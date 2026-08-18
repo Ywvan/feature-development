@@ -1,0 +1,20 @@
+{
+  "name": "feature-development",
+  "interface": {
+    "displayName": "Feature Development"
+  },
+  "plugins": [
+    {
+      "name": "feature-development",
+      "source": {
+        "source": "local",
+        "path": "./plugins/feature-development"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
