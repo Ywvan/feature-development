@@ -1,6 +1,6 @@
 {
   "name": "feature-development",
-  "version": "0.1.1+codex.20260818081109",
+  "version": "0.1.2+codex.20260819024100",
   "description": "轻量、分阶段的软件 Feature 调查设计、实现与独立验收工作流。",
   "author": {
     "name": "Personal"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Feature Development",
     "shortDescription": "分阶段完成 Feature 设计、实现与独立验收。",
-    "longDescription": "围绕 Feature Context 提供相互隔离的代码调查与技术设计、最小实现、独立 Code Review 与 Requirement Validation 工作流。",
+    "longDescription": "围绕 Feature Context、Requirement Evidence 与 Current Repo 提供相互隔离的代码调查与技术设计、最小实现、独立 Code Review 与 Requirement Validation 工作流。",
     "developerName": "Personal",
     "category": "Productivity",
     "capabilities": [
