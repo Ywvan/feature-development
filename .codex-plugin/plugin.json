@@ -1,0 +1,21 @@
+{
+  "name": "feature-development",
+  "version": "0.1.0",
+  "description": "轻量、分阶段的软件 Feature 调查设计、实现与独立验收工作流。",
+  "author": {
+    "name": "Personal"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Feature Development",
+    "shortDescription": "分阶段完成 Feature 设计、实现与独立验收。",
+    "longDescription": "围绕 Feature Context 提供相互隔离的代码调查与技术设计、最小实现、独立 Code Review 与 Requirement Validation 工作流。",
+    "developerName": "Personal",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": "根据当前阶段使用 feature-design、feature-implement 或 feature-review。"
+  }
+}
