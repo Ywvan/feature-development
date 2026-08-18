@@ -1,6 +1,6 @@
 ---
 name: feature-design
-description: 用于已提供 Feature Context 或等价需求上下文的软件 Feature 代码调查和技术设计阶段。结合原始需求资料与当前代码，形成 Current State、Target State、Gap Analysis、Technical Design、Implementation Plan 和可复制到新 Chat 的 Implementation Handoff。默认只读调查，第一轮不修改业务代码。
+description: 用于已提供 Feature Context 或等价需求上下文的软件 Feature 代码调查和技术设计阶段。结合原始需求资料与当前代码，形成 Current State、Target State、Gap Analysis、Technical Design、Implementation Plan 和可供后续 Implementation Context 复用的精简 Implementation Handoff；仅在认知表面积明显较大时建议 Implementation Workstreams。默认只读调查，第一轮不修改业务代码。
 ---
 
 # Feature Design
@@ -9,7 +9,7 @@ description: 用于已提供 Feature Context 或等价需求上下文的软件 F
 
 始终以“正确完成 Feature Context 定义的需求”为顶层目标。技术设计只决定 HOW，不得替代或重写 Scope、Relevant Business Rules、Target State、Out of Scope 或已确认业务边界。
 
-本 Skill 只负责调查与设计，不自动进入实现或 Review 阶段，不自动编排 Subagent，不在业务仓库持久化 Feature 临时文档。
+本 Skill 只负责调查与设计，不自动进入实现或 Review 阶段，不自动编排 Subagent，不在业务仓库持久化 Feature 临时文档，也不规定后续执行使用的 Task、Session、工具或 Agent Loop。
 
 ## 事实优先级
 
@@ -68,7 +68,37 @@ description: 用于已提供 Feature Context 或等价需求上下文的软件 F
 
 ### Implementation Plan
 
-按依赖顺序给出可执行步骤。每步说明目标、预期影响模块或文件、关键约束和对应验证，保持修改范围最小。
+按依赖顺序给出实现 Target State 所需的工程步骤。每步说明目标、预期影响模块或文件、关键约束和对应验证，保持修改范围最小。Plan 只描述工程动作及依赖关系，不绑定 Task、Session、Context、Subagent 或具体工具。
+
+### Suggested Implementation Workstreams
+
+仅当 Feature 的认知表面积明显较大，且按相对独立的工程能力组织上下文能降低实现阶段的理解成本时，才输出 Suggested Implementation Workstreams。简单 Feature 不要为了形式完整强行拆分。
+
+必须保持以下概念独立：
+
+- Task Decomposition 不等于 Context Isolation；
+- Context Isolation 不等于 Subagent Delegation；
+- Workstream 是上下文组织建议，不是运行时对象，也不代表必须创建 Task、Session、Context 或 Subagent；
+- Workstream 应对应相对独立的工程能力或业务闭环，不得按 DTO、Mapper、Service、单个文件等机械分层。
+
+每个建议的 Workstream 仅包含必要信息：
+
+- ID / Name；
+- Goal；
+- Relevant Requirements；
+- Relevant Design Decisions；
+- Scope；
+- Dependencies；
+- Acceptance Criteria。
+
+不要为 Workstream 设计状态机、任务数据库、控制器、心跳、重试、会话路由或“一 Workstream 一 Task / Session / Context / Subagent”的强制规则。
+
+### Context Boundary
+
+- Task 边界不等于 Session 边界；设计阶段的信息量可以较大，但交付给实现阶段的 Handoff 应保持小而完整；
+- 仅当阶段切换、上下文已被大量无效检索或调试污染、过时方案难以剥离、目标持续被稀释时，才建议使用 Fresh Context；不得把新建 Chat 设为固定流程；
+- Workstream 边界不等于 Context 边界。是否隔离上下文由认知负载决定，不由文件数量或模块数量机械决定；
+- Handoff 只压缩仍然有效的事实、决策、约束和验收契约，不携带过程噪音。
 
 ## 输出要求
 
@@ -80,22 +110,27 @@ description: 用于已提供 Feature Context 或等价需求上下文的软件 F
 4. Gap Analysis
 5. Technical Design
 6. Implementation Plan
-7. Risks / Open Questions
-8. Validation Strategy
+7. Suggested Implementation Workstreams（仅在确有必要时）
+8. Risks / Open Questions
+9. Validation Strategy
 
-最后必须输出独立章节 `# IMPLEMENTATION_HANDOFF`。该章节用于复制到全新的 Codex Chat，必须自包含、简洁，只保留已确认且与实现直接相关的信息，并包含：
+最后必须输出独立章节 `# IMPLEMENTATION_HANDOFF`。该章节供后续 Implementation Context 直接使用，不要求必须新建 Chat；必须自包含、紧凑、可执行，只保留已确认且与实现直接相关的信息，并包含：
 
 - `## Feature Goal`
-- `## Scope`
-- `## Relevant Business Rules`
-- `## Current State`
+- `## Confirmed Requirements`
+- `## Global Constraints`
+- `## Out of Scope`
+- `## Current State Summary`
 - `## Target State`
-- `## Gap`
-- `## Confirmed Technical Decisions`
-- `## Expected Affected Modules / Files`
-- `## Implementation Steps`
-- `## Must-Not-Change Constraints`
-- `## Risks / Open Questions`
-- `## Validation Requirements`
+- `## Key Gaps`
+- `## Technical Decisions`
+- `## Compatibility Constraints`
+- `## Relevant Code Areas`
+- `## Suggested Implementation Workstreams`（仅在确有必要时）
+- `## Feature-level Acceptance Criteria`
+- `## Known Risks`
+- `## Open Issues`
 
-Handoff 不得包含已废弃方案、中间讨论、已推翻假设、冗长代码摘录、无关调查记录或聊天历史摘要。
+Handoff 不得包含已废弃方案、中间讨论、已推翻假设、原始检索、文件读取、工具调用、调试历史、冗长代码摘录、无关调查记录、聊天历史摘要或运行时编排指令。
+
+Handoff 是设计结论的压缩载体，不替代当前代码。后续实现必须结合 Handoff 与实现时的 Current Repo 重新核对关键事实。

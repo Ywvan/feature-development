@@ -1,6 +1,6 @@
 {
   "name": "feature-development",
-  "version": "0.1.1",
+  "version": "0.1.1+codex.20260818081109",
   "description": "轻量、分阶段的软件 Feature 调查设计、实现与独立验收工作流。",
   "author": {
     "name": "Personal"
