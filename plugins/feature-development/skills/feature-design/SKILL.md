@@ -1,166 +1,91 @@
 ---
 name: feature-design
-description: 用于已提供 Feature Context 或等价需求上下文的软件 Feature 代码调查和技术设计阶段。将 Feature Context 作为高密度 Working Context 与 Evidence Index，按需核验高风险 Requirement Evidence，再结合当前代码形成 Current State、Target State、Gap Analysis、Technical Design、Implementation Plan 和精简 Implementation Handoff；仅在认知表面积明显较大时建议 Implementation Workstreams。默认只读调查，第一轮不修改业务代码。
+description: 基于 Feature Context 或等价需求上下文与当前代码完成软件 Feature 的代码调查和技术设计。默认只读，不修改业务代码。输出 Current State、Target State、Gap Analysis、Technical Design、Implementation Plan 和必要的 Open Questions。
 ---
 
 # Feature Design
 
-## 顶层目标
+## Goal
 
-始终以“正确完成 Requirement Authority 定义的需求”为顶层目标。Feature Context 是需求侧压缩后的 Working Context 与 Evidence Index，不是高于原始 Requirement Evidence 的独立事实源。技术设计只决定 HOW，不得替代或重写 Scope、Relevant Business Rules、Target State、Out of Scope 或已确认业务边界。
+正确理解需求和当前代码，给出可以落地的最小技术方案。
 
-本 Skill 只负责调查与设计，不自动进入实现或 Review 阶段，不自动编排 Subagent，不在业务仓库持久化 Feature 临时文档，也不规定后续执行使用的 Task、Session、工具或 Agent Loop。
+本 Skill 只负责调查与设计，不修改业务代码，不自动进入实现或 Review，也不规定 Codex 的搜索顺序、工具选择、Task、Context、Session 或 Subagent 策略。
 
-## Requirement Authority 与事实优先级
+## 事实来源
 
-按以下规则处理信息：
+- 需求事实来自用户最新确认、当前有效 PRD / 原型 / 产品补充说明和第三方接口文档在其职责范围内的定义。
+- Feature Context 是高密度需求上下文，默认优先使用；当它与明确的原始需求证据冲突时，以原始证据和用户最新确认处理，并报告冲突。
+- 当前代码、配置和数据链路决定 Current State；不得用当前实现反向定义业务需求。
+- Technical Design、历史讨论和已有方案只是技术线索，不是事实源。
+- 未经验证的判断可以作为调查假设，但不得写成已确认事实。
 
-1. Requirement Authority 来自当前有效的 Requirement Evidence，包括用户最新明确确认、当前有效 PRD / 原型 / 产品补充说明，以及第三方接口文档在其接口契约职责范围内的定义。
-2. Feature Context 是从 Requirement Evidence 派生的 Working Context 与 Evidence Index。默认优先读取并使用 Feature Context 降低 Context 成本，但不得因为 Feature Context 已压缩就假定其一定完整。
-3. Feature Context 与明确的 Requirement Evidence 不一致时，将其视为“派生上下文与证据不一致”，按 Evidence 修正需求理解并显式报告；不要为了迁就 Feature Context 忽略原始证据。
-4. 多个有权威性的 Requirement Evidence 彼此冲突，且没有用户后续确认解决冲突时，标记为 Requirement Conflict / NOT VERIFIED，不自行取舍或创造折中规则。
-5. Feature Context 中“用户确认”的标签本身不是独立 Evidence。只有当任务中存在可定位的用户确认原文、确认记录或明确 Evidence Pointer 时，才将该事项视为已验证的用户确认；不得因为 Feature Context 自己标记为“用户确认”而形成循环证明，也不得把确认影响范围扩大到相邻规则。
-6. 当前代码、配置和数据链路是 Current State 的事实源；不得用当前实现反向定义业务规则。
-7. 已有 Technical Design、Implementation Plan 和历史讨论仅作为技术线索；代码证据推翻技术假设时可调整 HOW，但不得借此改变 Requirement Authority。
+对会直接改变结果的关键规则要保留精确语义，例如：状态白名单 / 黑名单、枚举、金额公式和阈值、权限和审批条件、幂等 / 并发约束、历史兼容边界、第三方接口契约、关键 AND / OR / NOT 条件。只有当这些规则缺失、冲突或会改变设计结论时，才回查对应原始证据；不要机械重读全部需求资料。
 
-对所有关键结论区分“已确认需求事实”“已确认代码事实”“推测”“未确认项”。无可靠证据时不得把推测写成事实。
+## 调查原则
 
-## Hard Fact 与选择性 Evidence Verification
+先理解与当前 Feature 相关的真实代码，再形成设计。
 
-Hard Fact 指一旦丢失、改写或合并就可能直接改变“允许 / 禁止、通过 / 拒绝、状态流转、金额结果、兼容行为或接口契约”的需求事实。至少包括：
+根据任务需要检查入口、必要上下游调用、关键数据流、SQL、事务、缓存、RPC、MQ、Job、异步流程、外部接口、权限、配置和测试。只读取足以支持当前设计判断的上下文，不为满足流程形式穷举所有引用。
 
-- 状态码、状态白名单 / 黑名单、枚举值；
-- 金额公式、比例、阈值、精度、舍入规则；
-- 权限、数据范围、审批条件；
-- 幂等、并发、唯一性条件；
-- 历史兼容、存量数据边界；
-- 第三方接口字段、必填条件、枚举、错误码、调用约束；
-- 明确的 MUST / MUST NOT / ONLY 语义；
-- 会改变结果的 AND / OR / NOT 判断关系。
+如果代码事实推翻已有技术假设，修正技术方案；如果缺失的需求信息会实质改变业务行为、修改范围或验收结论，列为 Open Question，不自行创造业务规则。
 
-Feature Design 开始时：
+## 输出
 
-1. 完整读取 Feature Context 或等价需求上下文，识别 Feature Goal、Scope、Relevant Business Rules、Target State、Out of Scope、Acceptance Criteria、已列出的 Hard Facts 和 Evidence Pointers。
-2. **不要只验证 Feature Context 已经列出的 Hard Facts。** 当原始 Requirement Evidence 可用时，先做一次低成本 `Hard Fact Discovery Scan`，用于发现被 Context Compression 整体漏掉的关键规则：
-   - 优先搜索状态/枚举、金额/公式/比例/阈值、权限/审批、幂等/并发、历史兼容、接口契约、`必须/不得/仅/只能`、AND / OR / NOT，以及 Acceptance Criteria / 状态矩阵等高风险信号；
-   - 先 search / find，再只读取命中位置及必要上下文；不要因此通读所有原始资料；
-   - 将 Evidence 中发现的 Hard Facts 与 Feature Context 对照。Evidence 明确存在但 Feature Context 缺失的，标记为 `Context Gap`，补入本轮 Verified Hard Facts，不能因为 Feature Context 没写就忽略。
-3. 对 Feature Context 已列出的 Hard Facts，以及 Discovery Scan 新发现且与本 Feature 实现方向直接相关的高风险 Hard Facts，做 Selective Evidence Verification。优先按 Evidence Pointer 或搜索命中位置回查对应原始片段。
-4. STATE / ENUM、AMOUNT / FORMULA / THRESHOLD、PERMISSION、APPROVAL、IDEMPOTENCY / CONCURRENCY、需求明确要求的 COMPATIBILITY、EXTERNAL API CONTRACT，以及关键 AND / OR / NOT 条件，默认属于应验证的高风险类型。
-5. 仅在 Evidence Pointer 缺失、Discovery Scan 命中不完整、证据冲突、上下文不足、Feature Context 与代码现实明显矛盾，或高风险判断仍无法可靠完成时扩大 Evidence 回查范围。
-6. 对核验后的 Hard Fact 记录简短 ID、精确 Fact、Evidence Pointer 和 Verification Status：`VERIFIED` / `CONFLICT` / `NOT VERIFIED`。若该事实由 Discovery Scan 发现且 Feature Context 原先缺失，同时标记 `Context Gap: MISSING_FROM_FEATURE_CONTEXT`。不要建立外部状态机或任务数据库。
+### 1. Current State
 
-若缺失的信息会实质改变业务行为、修改范围或验收结论，将其列为 Open Question；不要自行补充业务规则。若信息足以开展只读调查，先继续调查并明确剩余不确定项。
+说明当前系统实际上如何工作，只保留与本 Feature 相关的入口、关键调用链、数据流、重要分支和已有约束。引用必要的代码证据，不堆砌文件列表。
 
-## 调查流程
+### 2. Target State
 
-严格先调查，再设计：
+用清晰业务语言说明需求完成后系统应该如何工作。关键状态、金额、权限、接口和兼容规则必须保留精确条件。
 
-1. 搜索并定位与 Scope 相关的真实入口，不因文件名、类名、方法名或局部 grep 结果直接下结论。
-2. 阅读入口实现并沿调用链向上下游追踪，直到证据足以解释实际业务行为。
-3. 追踪关键参数、状态、金额、权限和结果的数据流，包括创建、转换、持久化、读取、回调和消费位置。
-4. 按实际影响检查数据库、SQL、事务、缓存、RPC、MQ、Job、异步任务和外部接口；不机械扩大无关范围。
-5. 检查相关测试、配置开关、兼容分支和现有成熟实现模式。
-6. 记录关键代码证据位置，并区分正常路径、异常路径、边界场景和未覆盖场景。
+### 3. Gap Analysis
 
-第一轮只允许只读调查和设计。不得修改业务代码、配置、数据库、接口协议或业务仓库文件；不得创建 `FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`PLAN.md` 等临时文件。所有设计与 Handoff 默认直接输出在当前 Chat。
+逐项说明 Current State 与 Target State 的差异。每个 Gap 应能对应到后续必要的代码或验证动作；无法确认的内容放入 Open Questions。
 
-## 形成设计
+### 4. Technical Design
 
-### Current State
+给出实现 Target State 的最小必要方案：
 
-基于真实代码证据说明当前系统实际上如何工作，包括相关入口、调用链、数据流、依赖、关键分支和已有验证。不要把需求目标描述成现状。
+- 优先复用项目已有成熟模式；
+- 只修改与 Gap 直接相关的代码和配置；
+- 不顺手重构、改名、抽象或优化；
+- 不改变接口、数据库结构或既有业务语义，除非需求明确要求；
+- 说明关键分支、数据一致性、失败处理、兼容性、日志和测试策略；
+- 重点解释“为什么这样改”，不要用 Harness 术语代替工程描述。
 
-### Target State
+### 5. Implementation Plan
 
-从已经过必要 Evidence Verification 的 Requirement Working Context 中形成目标行为，逐项覆盖 Scope、Relevant Business Rules、Verified Hard Facts、Acceptance Criteria 和 Out of Scope。不得为了适配当前代码结构而重写需求。
+按依赖顺序列出可执行步骤。每步只说明：目标、主要影响范围、关键约束、验证方式。简单 Feature 不强行拆分任务或 Workstream；复杂 Feature 如确实存在相对独立的业务闭环，可以建议拆分，但不绑定 Session、Context 或 Subagent。
 
-### Gap Analysis
+### 6. Risks / Open Questions
 
-逐项列出 Current State 与 Target State 的具体差异。每个 Gap 应能映射到必要的代码或验证动作；不能确认的差异保留为 Open Question。Hard Fact 对应的缺口不得被抽象成宽泛描述，应保留决定结果的精确条件。
+只列真实存在且会影响实现或验收的风险与未确认项。
 
-### Technical Design
+### 7. Validation Strategy
 
-设计完成 Target State 所需的最小必要方案：
+说明与变更风险匹配的验证方式，包括必要的静态检查、单元测试、构建、集成验证或关键业务场景。
 
-- 优先复用当前项目已验证的成熟模式。
-- 只调整与 Gap 直接相关的代码和配置。
-- 不顺手重构、改名、抽象、优化或修复范围外问题。
-- 不修改接口协议、数据库结构或既有业务语义，除非 Requirement Authority 明确要求。
-- 明确关键分支、状态流转、数据一致性、兼容性、失败处理、日志和测试策略。
-- 技术假设与代码事实冲突时，修正技术方案并说明依据；业务事实不完整时停止创造方案并列出 Open Question。
+## Implementation Handoff
 
-### Implementation Plan
+当后续实现需要跨 Context 复用设计结果时，最后附一个精简 `# IMPLEMENTATION_HANDOFF`；如果当前会话会直接继续实现，也可以保持很短。
 
-按依赖顺序给出实现 Target State 所需的工程步骤。每步说明目标、预期影响模块或文件、关键约束、Relevant Hard Facts 和对应验证，保持修改范围最小。Plan 只描述工程动作及依赖关系，不绑定 Task、Session、Context、Subagent 或具体工具。
+Handoff 只保留：
 
-### Suggested Implementation Workstreams
+- Feature Goal
+- Confirmed Requirements
+- Critical Business Rules
+- Out of Scope
+- Current State Summary
+- Target State
+- Key Gaps
+- Technical Decisions
+- Relevant Code Areas
+- Acceptance Criteria
+- Open Issues
 
-仅当 Feature 的认知表面积明显较大，且按相对独立的工程能力组织上下文能降低实现阶段的理解成本时，才输出 Suggested Implementation Workstreams。简单 Feature 不要为了形式完整强行拆分。
+不要携带检索过程、工具调用、已废弃方案、冗长代码摘录、状态机式流程元数据或无关聊天历史。
 
-必须保持以下概念独立：
+## Writing Style
 
-- Task Decomposition 不等于 Context Isolation；
-- Context Isolation 不等于 Subagent Delegation；
-- Workstream 是上下文组织建议，不是运行时对象，也不代表必须创建 Task、Session、Context 或 Subagent；
-- Workstream 应对应相对独立的工程能力或业务闭环，不得按 DTO、Mapper、Service、单个文件等机械分层。
-
-每个建议的 Workstream 仅包含必要信息：
-
-- ID / Name；
-- Goal；
-- Relevant Requirements；
-- Relevant Hard Facts；
-- Relevant Design Decisions；
-- Scope；
-- Dependencies；
-- Acceptance Criteria。
-
-不要为 Workstream 设计状态机、任务数据库、控制器、心跳、重试、会话路由或“一 Workstream 一 Task / Session / Context / Subagent”的强制规则。
-
-### Context Boundary
-
-- Task 边界不等于 Session 边界；设计阶段的信息量可以较大，但交付给实现阶段的 Handoff 应保持小而完整；
-- 仅当阶段切换、上下文已被大量无效检索或调试污染、过时方案难以剥离、目标持续被稀释时，才建议使用 Fresh Context；不得把新建 Chat 设为固定流程；
-- Workstream 边界不等于 Context 边界。是否隔离上下文由认知负载决定，不由文件数量或模块数量机械决定；
-- Handoff 只压缩仍然有效的事实、决策、约束和验收契约，不携带过程噪音；
-- 与实现直接相关的 Hard Facts 必须保留精确语义和 Evidence Pointer，不能再次压缩成“状态满足规则”“金额符合要求”等失去决策条件的描述。
-
-## 输出要求
-
-先输出以下调查与设计结果：
-
-1. Requirement Context 理解、Hard Fact Discovery / Evidence Verification、Context Gaps 与事实冲突
-2. Current State
-3. Target State
-4. Gap Analysis
-5. Technical Design
-6. Implementation Plan
-7. Suggested Implementation Workstreams（仅在确有必要时）
-8. Risks / Open Questions
-9. Validation Strategy
-
-最后必须输出独立章节 `# IMPLEMENTATION_HANDOFF`。该章节供后续 Implementation Context 直接使用，不要求必须新建 Chat；必须自包含、紧凑、可执行，只保留已确认且与实现直接相关的信息，并包含：
-
-- `## Feature Goal`
-- `## Confirmed Requirements`
-- `## Verified Hard Facts`
-- `## Evidence Pointers`
-- `## Global Constraints`
-- `## Out of Scope`
-- `## Current State Summary`
-- `## Target State`
-- `## Key Gaps`
-- `## Technical Decisions`
-- `## Compatibility Constraints`
-- `## Relevant Code Areas`
-- `## Suggested Implementation Workstreams`（仅在确有必要时）
-- `## Feature-level Acceptance Criteria`
-- `## Known Risks`
-- `## Open Issues`
-
-`Verified Hard Facts` 仅保留与实现直接相关的高风险事实；每项至少包含 ID、精确 Fact、Verification Status 和对应 Evidence Pointer。若事实来自 Evidence Discovery 且原 Feature Context 漏失，保留 `Context Gap` 标记。`Evidence Pointers` 只保存必要定位信息，不复制大段原始资料。
-
-Handoff 不得包含已废弃方案、中间讨论、已推翻假设、原始检索、文件读取、工具调用、调试历史、冗长代码摘录、无关调查记录、聊天历史摘要或运行时编排指令。
-
-Handoff 是设计结论和已验证 Requirement Context 的压缩载体，不替代 Requirement Evidence，也不替代当前代码。后续实现默认使用 Handoff 与 Feature Context 工作；只有相关 Hard Fact 未验证、发生冲突或实现阶段出现新的高风险歧义时，才按 Evidence Pointer 选择性回查原始需求资料。
+默认使用直接、易读的中文工程表达。优先写“当前代码做什么、需求要求什么、差在哪里、准备怎么改、为什么这样改”。除非确实需要区分事实来源或冲突，不要反复使用 Requirement Authority、Evidence Pointer、Working Context、Coverage、Workstream 等元流程术语。
