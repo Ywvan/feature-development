@@ -1,6 +1,6 @@
 ---
 name: feature-review
-description: 对已完成或部分完成的 Feature 做独立 Review。基于当前需求、最终 diff、相关当前代码和验证证据，检查需求是否实现正确、关键场景是否遗漏、集成是否可靠。默认只读，不修改生产代码。
+description: 对已有正式 Feature 的实现做独立 Review。基于外部工作区的原始 Requirement Evidence、滚动 Handoff、最终 diff、当前代码和验证证据重建结论，将最新结果独立写入 REVIEW_RESULT.md；不修改业务仓库。
 ---
 
 # Feature Review
@@ -10,6 +10,17 @@ description: 对已完成或部分完成的 Feature 做独立 Review。基于当
 独立判断当前实现是否正确完成需求，而不是制造 Finding 或清零 Checklist。
 
 Review 默认只读。Technical Design、Implementation Handoff、实现说明和历史 Review Finding 都只能作为线索，不能代替当前需求、最终 diff、当前代码和实际验证证据。
+
+## Feature 工作区
+
+Review 属于已有正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+
+- 复用 `~/Documents/Codex/features/` 下的对应需求目录；按当前 WSL 用户解析 `~`，不得写死用户名或机器路径，也不得改用 `~/.codex/features/`。
+- 先读 `HANDOFF.md` 与 `REQUIREMENT_SOURCES.md`，再按 Review Scope 和风险选择性读取原始 Evidence、Technical Design 与 Feature Context；不得直接继承实现过程作为结论。
+- 将最新独立审查写入外部 `REVIEW_RESULT.md`，并只把最新门禁、阻塞项和下一动作同步到 `HANDOFF.md`。
+- Review 期间业务仓库、生产代码、配置和数据库保持只读；写外部文档不改变这一边界。
+
+不属于已有正式需求的一次性只读 Review 不强制创建工作区，可以只在 Chat 输出。
 
 ## Review Baseline
 
@@ -77,3 +88,5 @@ Review 结束时只需要回答以下问题：
 每个 Finding 优先用具体业务和代码语言描述，不反复使用 Requirement Authority、Hard Fact Coverage、Evidence Pointer、Integration Correctness、Final Gate 等元流程术语。
 
 不要输出没有证据的风格偏好，不为了凑数量输出低价值 Finding。
+
+正式需求完成 Review 后，使用 [REVIEW_RESULT 模板](../../assets/feature-workspace/REVIEW_RESULT.md) 更新工作区根目录的 `REVIEW_RESULT.md`。保留最新结论和证据，历史仅记录上一轮结果为何失效；Findings 全文和工具过程不重复写入 Handoff。

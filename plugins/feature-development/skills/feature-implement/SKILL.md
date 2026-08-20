@@ -1,6 +1,6 @@
 ---
 name: feature-implement
-description: 基于已确认需求、技术设计和当前代码完成 Feature 实现，也用于处理 Review Finding。修改前重新读取当前真实代码，只做完成目标所需的最小必要修改，并执行与风险匹配的验证。
+description: 基于外部 Feature 工作区的 Requirement Evidence、当前技术设计、滚动 Handoff 与当前代码完成正式 Feature 实现，也用于处理已验证的 Review Finding。只做完成目标所需的最小必要修改、验证并更新 Handoff。
 ---
 
 # Feature Implement
@@ -10,6 +10,18 @@ description: 基于已确认需求、技术设计和当前代码完成 Feature �
 正确实现需求，而不是机械执行旧方案或清零 Review Finding。
 
 本 Skill 不规定 Codex 的搜索顺序、工具、Task、Context、Session 或 Subagent 策略。当前代码决定技术事实；需求事实仍以用户最新确认和当前有效需求资料为准。
+
+## Feature 工作区
+
+处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+
+- 工作区逻辑根目录为 `~/Documents/Codex/features/`；按当前 WSL 用户解析 `~`，不得写死用户名或机器路径，也不得改用 `~/.codex/features/`。
+- 优先识别并复用已有需求目录。若正式需求没有工作区，先补齐原始 Requirement Evidence、`REQUIREMENT_SOURCES.md`、最小 `TECHNICAL_DESIGN.md` 与 `HANDOFF.md`，再编辑业务代码。
+- 新阶段先读 `HANDOFF.md` 和 `REQUIREMENT_SOURCES.md`，再按当前目标选择性读取 Technical Design、Feature Context 或 Evidence Pointer 指向的原始片段。
+- 原始需求只追加新 Evidence 或更新来源状态，不覆盖旧证据。Feature Context、设计和 Handoff 都不能成为新的需求事实源。
+- 在重要里程碑、验证结束和交付前更新外部 `HANDOFF.md`；只保留当前有效状态，不累积工具日志、调试过程或废弃方案。
+
+Feature 文档只写入外部工作区，不写入业务仓库。外部文档写入本身不授权修改业务代码或扩大 Scope；代码修改仍以用户已授权的正式 Feature 范围为限。
 
 ## 修改前
 
@@ -85,3 +97,5 @@ description: 基于已确认需求、技术设计和当前代码完成 Feature �
 只有本次确实涉及接口、数据库、业务语义或测试缺口时才单独说明，不输出无意义的固定模板项。
 
 避免用 Requirement Authority、Working Context、Coverage、Workstream、Evidence Pointer 等流程术语描述普通代码修改；优先使用具体业务和代码语言。
+
+正式需求交付前，将实际修改、设计偏差、当前代码基线、验证结果、未验证项、阻塞项和下一动作同步到外部 `HANDOFF.md`。不得修改 `requirements/` 中的原始 Evidence。

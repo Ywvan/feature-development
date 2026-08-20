@@ -1,6 +1,6 @@
 ---
 name: feature-design
-description: 基于 Feature Context 或等价需求上下文与当前代码完成软件 Feature 的代码调查和技术设计。默认只读，不修改业务代码。输出 Current State、Target State、Gap Analysis、Technical Design、Implementation Plan 和必要的 Open Questions。
+description: 用于正式软件 Feature 的需求资料保真、代码调查和技术设计。在外部 Feature 工作区维护 Requirement Evidence、当前技术设计与滚动 Handoff；仅在确有压缩价值时生成 FEATURE_CONTEXT。默认不修改业务代码。
 ---
 
 # Feature Design
@@ -10,6 +10,17 @@ description: 基于 Feature Context 或等价需求上下文与当前代码完�
 正确理解需求和当前代码，给出可以落地的最小技术方案。
 
 本 Skill 只负责调查与设计，不修改业务代码，不自动进入实现或 Review，也不规定 Codex 的搜索顺序、工具选择、Task、Context、Session 或 Subagent 策略。
+
+## Feature 工作区
+
+处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+
+- 在逻辑根目录 `~/Documents/Codex/features/` 下创建或复用独立需求目录；实际操作时按当前 WSL 用户解析 `~`，不得写死用户名或机器路径，也不得改用 `~/.codex/features/`。
+- 在总结或设计前，先保真保存 Chat 原文和可获得的原始附件，并登记 `REQUIREMENT_SOURCES.md`。原始资料不得被派生文档覆盖或静默改写。
+- `FEATURE_CONTEXT.md` 仅是可选的派生 Working Context；单一清晰需求不机械生成。
+- 将当前有效设计写入 `TECHNICAL_DESIGN.md`，将跨阶段当前态写入 `HANDOFF.md`。
+
+第一轮允许写入外部 Feature 工作区，但业务仓库、业务代码、配置和数据库保持只读。Feature 文档不得持久化到业务仓库。
 
 ## 事实来源
 
@@ -85,6 +96,8 @@ Handoff 只保留：
 - Open Issues
 
 不要携带检索过程、工具调用、已废弃方案、冗长代码摘录、状态机式流程元数据或无关聊天历史。
+
+正式需求还必须把当前有效的调查与设计写入外部 `TECHNICAL_DESIGN.md`，并用同样的精简内容初始化或更新 `HANDOFF.md`。Chat 输出应给出结论摘要和文档位置，不能成为唯一持久化载体。
 
 ## Writing Style
 
