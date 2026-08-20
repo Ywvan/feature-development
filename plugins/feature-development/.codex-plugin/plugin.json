@@ -1,15 +1,15 @@
 {
   "name": "feature-development",
-  "version": "0.1.2+codex.20260819024100",
-  "description": "轻量、分阶段的软件 Feature 调查设计、实现与独立验收工作流。",
+  "version": "0.1.2+codex.20260820083323",
+  "description": "\u4f7f\u7528\u5916\u90e8\u9700\u6c42\u8d44\u6599\u5de5\u4f5c\u533a\u5b8c\u6210\u8f6f\u4ef6 Feature \u7684\u4fdd\u771f\u9700\u6c42\u7ba1\u7406\u3001\u8c03\u67e5\u8bbe\u8ba1\u3001\u5b9e\u73b0\u4e0e\u72ec\u7acb\u9a8c\u6536\u3002",
   "author": {
     "name": "Personal"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Feature Development",
-    "shortDescription": "分阶段完成 Feature 设计、实现与独立验收。",
-    "longDescription": "围绕 Feature Context、Requirement Evidence 与 Current Repo 提供相互隔离的代码调查与技术设计、最小实现、独立 Code Review 与 Requirement Validation 工作流。",
+    "shortDescription": "\u57fa\u4e8e\u6301\u4e45\u5316\u9700\u6c42\u8d44\u6599\u5b8c\u6210 Feature \u5f00\u53d1\u4e0e\u9a8c\u6536\u3002",
+    "longDescription": "\u5728\u4e1a\u52a1\u4ed3\u5e93\u5916\u7ef4\u62a4\u539f\u59cb Requirement Evidence\u3001\u53ef\u9009 Feature Context\u3001\u5f53\u524d\u6280\u672f\u8bbe\u8ba1\u3001\u6eda\u52a8 Handoff \u4e0e\u72ec\u7acb Review Result\uff0c\u5e76\u636e\u6b64\u5b8c\u6210\u4ee3\u7801\u8c03\u67e5\u3001\u6700\u5c0f\u5b9e\u73b0\u548c Requirement Validation\u3002",
     "developerName": "Personal",
     "category": "Productivity",
     "capabilities": [
@@ -19,6 +19,6 @@
     "brandColor": "#0B4FE5",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
-    "defaultPrompt": "根据当前阶段使用 feature-design、feature-implement 或 feature-review。"
+    "defaultPrompt": "\u4e3a\u6b63\u5f0f\u9700\u6c42\u5efa\u7acb\u6216\u590d\u7528\u5916\u90e8 Feature \u5de5\u4f5c\u533a\uff0c\u5e76\u6839\u636e\u5f53\u524d\u9636\u6bb5\u4f7f\u7528 feature-design\u3001feature-implement \u6216 feature-review\u3002"
   }
 }

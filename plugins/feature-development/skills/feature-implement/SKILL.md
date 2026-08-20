@@ -1,6 +1,6 @@
 ---
 name: feature-implement
-description: 用于基于 Requirement Working Context、Verified Hard Facts、Global Constraints、Out of Scope、Implementation Handoff 与 Current Repo 完成软件 Feature 实现，也用于处理经过验证的 Review Finding。修改前必须重新读取当前真实代码；Feature Context 和 Handoff 均不替代 Requirement Evidence 或 Current Repo。只做实现 Target State 所需的最小必要修改，并完成与风险匹配的验证。
+description: 用于基于外部 Feature 工作区的 Requirement Evidence、滚动 Handoff、Verified Hard Facts、Technical Design 与 Current Repo 完成正式 Feature 实现，也用于处理经过验证的 Review Finding。修改前重新读取当前真实代码，实施最小必要修改、验证并更新 Handoff；派生文档不替代原始需求或 Current Repo。
 ---
 
 # Feature Implement
@@ -9,7 +9,16 @@ description: 用于基于 Requirement Working Context、Verified Hard Facts、Gl
 
 始终以“正确完成 Requirement Authority 定义的需求”为顶层目标。Feature Context 是 Working Context，Implementation Handoff、Implementation Plan 和 Review Finding 都是实现输入，不得成为新的独立需求事实源。
 
-本 Skill 只负责实现或 Review Fix，不自动进入独立 Review，不自动编排 Subagent，不创建跨会话状态或在业务仓库持久化 Feature 临时文档，也不规定 Codex 的搜索、工具、Task、Context 或 Agent Loop 策略。
+本 Skill 只负责实现或 Review Fix，不自动进入独立 Review，不自动编排 Subagent，不在业务仓库持久化 Feature 临时文档，也不规定 Codex 的搜索、工具、Task、Context 或 Agent Loop 策略。跨阶段只维护外部 Feature 工作区的滚动 Handoff，不建立 Controller、任务数据库或执行历史。
+
+## Feature 工作区
+
+处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+
+1. Feature 工作区逻辑根目录使用 `~/Documents/Codex/features/`。实际文件操作前按当前 WSL 用户解析为绝对路径；不得写死用户名、`/home/<user>` 或 `/mnt/c/Users/<user>` 等单机路径。Windows 路径仅在用户明确要求导出或定位 Windows 文件时按需转换。
+2. 优先识别并复用已有需求目录；若正式需求绕过 Design 直接进入实现且尚无目录，停止代码编辑，先补齐原始 Evidence、`REQUIREMENT_SOURCES.md`、最小 Technical Design 和 `HANDOFF.md`。
+3. 新阶段先读 `HANDOFF.md` 与 `REQUIREMENT_SOURCES.md`，再按当前目标选择性读取 Technical Design、Feature Context 或原始证据片段，不无差别重读全部资料。
+4. 在重要实现里程碑、验证结束和交付前更新 `HANDOFF.md` 当前态；不得修改 `requirements/` 中的原始需求。
 
 ## 输入优先级
 
@@ -26,12 +35,18 @@ description: 用于基于 Requirement Working Context、Verified Hard Facts、Gl
 
 当冲突涉及 Requirement Authority、Verified Hard Facts、Global Constraints、Out of Scope、Target State 或 Acceptance Criteria 时，不得擅自改写需求。若只是 Feature Context 与其明确 Evidence 不一致，按 Evidence 修正派生上下文并报告；若权威 Requirement Evidence 彼此冲突且未被后续用户确认解决，则停止相关高风险修改并请求确认。
 
+## 核心前提失效处理
+
+新证据或用户纠正推翻当前实现方案的核心前提时，立即停止依赖该前提的编辑和修复：明确失效前提、受影响的设计结论及已修改区域，返回必要的只读调查，并重新形成受影响范围的 Current State、Target State 与 Gap Analysis。已产生的修改先标记为待复核，不得擅自覆盖用户工作或继续在旧方案骨架上做局部补丁；只有重新取证后仍成立的部分才能继续保留和实现。
+
+同时将失效前提、影响范围、当前修改状态、替代结论或下一动作与 Evidence Pointer 写入 `TECHNICAL_DESIGN.md` 和 `HANDOFF.md` 的 `Invalidated Premises`；旧结论不得继续保留在当前有效决策区。
+
 ## 修改前检查
 
 开始编辑前完成：
 
-1. 读取 Feature Context 与用户当前明确指定的 Scope，提取 Feature Goal、Confirmed Requirements、Global Constraints、Out of Scope、Target State 和 Acceptance Criteria。
-2. 读取 Implementation Handoff，识别 Verified Hard Facts、Evidence Pointers、Key Gaps、Technical Decisions、Compatibility Constraints、Relevant Code Areas、Known Risks、Open Issues 和建议的 Workstreams（如有）。
+1. 读取工作区 `HANDOFF.md`、`REQUIREMENT_SOURCES.md` 与用户当前明确指定的 Scope，提取 Feature Goal、Confirmed Requirements、Global Constraints、Out of Scope、Target State 和 Acceptance Criteria。
+2. 按 Handoff 当前目标读取 Technical Design、Feature Context（如有）和必要 Evidence Pointer，识别 Verified Hard Facts、Key Gaps、Technical Decisions、Compatibility Constraints、Relevant Code Areas、Known Risks、Open Issues 和建议的 Workstreams（如有）。
 3. 检查仓库级指令、当前工作树状态和用户已有修改，避免覆盖或混入无关变更。
 4. 重新阅读待修改区域及必要上下游调用链、数据流、SQL、配置和测试。
 5. 验证决定实现边界的关键技术假设，不默认 Design Chat 一定正确。
@@ -78,7 +93,7 @@ Current Repo 是已实现技术事实的主要来源。后续 Context 不需要�
 - 对 Relevant Hard Facts 保留精确判断语义。状态白名单 / 黑名单、枚举、金额公式、阈值、AND / OR / NOT 条件不得实现成含糊的“有效状态”“金额合法”等宽泛逻辑。
 - 若完成任务必须扩大修改范围，先说明原因、影响和不可替代性；需要新增权限或改变需求时停止并请求用户确认。
 
-不要在业务仓库创建 `FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`PLAN.md` 或其他 Feature 临时文件，除非用户明确要求创建该交付物。
+不要在业务仓库创建 `FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`HANDOFF.md`、`PLAN.md` 或其他 Feature 临时文件。正式需求的这些资料只写入外部 Feature 工作区；业务仓库内的正式交付文档仍需用户另行明确授权。
 
 ## Review Fix Mode
 
@@ -140,3 +155,5 @@ Current Repo 是已实现技术事实的主要来源。后续 Context 不需要�
 `Business Rule Coverage` 应优先按 Relevant Hard Fact ID / Requirement 映射“需求事实 → 实现证据 → 测试或验证证据 → 结论”，避免只输出概括性完成描述。
 
 同时明确是否改变接口、数据库和已有业务语义，是否需要补充测试，以及所有不确定或未验证项。
+
+交付前必须把实际修改、设计偏差、代码基线、验证命令与结果、未验证范围、阻塞项和唯一下一动作同步到工作区 `HANDOFF.md`。只保留当前有效状态；过程日志和废弃方案不得累计进入 Handoff。

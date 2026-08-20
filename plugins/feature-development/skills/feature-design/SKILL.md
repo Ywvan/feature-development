@@ -1,6 +1,6 @@
 ---
 name: feature-design
-description: 用于已提供 Feature Context 或等价需求上下文的软件 Feature 代码调查和技术设计阶段。将 Feature Context 作为高密度 Working Context 与 Evidence Index，按需核验高风险 Requirement Evidence，再结合当前代码形成 Current State、Target State、Gap Analysis、Technical Design、Implementation Plan 和精简 Implementation Handoff；仅在认知表面积明显较大时建议 Implementation Workstreams。默认只读调查，第一轮不修改业务代码。
+description: 用于正式软件 Feature 的需求资料保真、代码调查和技术设计阶段。在外部 Feature 工作区保存 Requirement Evidence、当前有效技术设计和滚动 Handoff；仅在确有压缩价值时生成 Feature Context。结合当前代码形成 Current State、Target State、Gap Analysis、Technical Design 和 Implementation Plan，第一轮不修改业务代码。
 ---
 
 # Feature Design
@@ -9,7 +9,17 @@ description: 用于已提供 Feature Context 或等价需求上下文的软件 F
 
 始终以“正确完成 Requirement Authority 定义的需求”为顶层目标。Feature Context 是需求侧压缩后的 Working Context 与 Evidence Index，不是高于原始 Requirement Evidence 的独立事实源。技术设计只决定 HOW，不得替代或重写 Scope、Relevant Business Rules、Target State、Out of Scope 或已确认业务边界。
 
-本 Skill 只负责调查与设计，不自动进入实现或 Review 阶段，不自动编排 Subagent，不在业务仓库持久化 Feature 临时文档，也不规定后续执行使用的 Task、Session、工具或 Agent Loop。
+本 Skill 只负责调查与设计，不自动进入实现或 Review 阶段，不自动编排 Subagent，不在业务仓库持久化 Feature 临时文档，也不规定后续执行使用的 Task、Session、工具或 Agent Loop。正式需求的 Requirement Evidence、Technical Design 和 Handoff 必须写入业务仓库之外的 Feature 工作区。
+
+## Feature 工作区
+
+处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)。使用插件 [Feature Workspace 模板](../../assets/feature-workspace/) 创建或复用需求目录：
+
+1. Feature 工作区逻辑根目录使用 `~/Documents/Codex/features/`。实际文件操作前按当前 WSL 用户解析为绝对路径；不得写死用户名、`/home/<user>` 或 `/mnt/c/Users/<user>` 等单机路径。Windows 路径仅在用户明确要求导出或定位 Windows 文件时按需转换。
+2. 在压缩、总结或设计前，先将 Chat 原文逐字保存并原样复制可用附件，完成 `REQUIREMENT_SOURCES.md`。
+3. 仅在契约规定的多来源、长文本或复杂规则场景创建 `FEATURE_CONTEXT.md`；单一清晰需求直接使用原始 Evidence。
+4. 将当前有效设计写入 `TECHNICAL_DESIGN.md`，并初始化或更新唯一的滚动 `HANDOFF.md`。
+5. 外部工作区写入不改变第一轮对业务代码、配置、数据库和业务仓库文件的只读边界。
 
 ## Requirement Authority 与事实优先级
 
@@ -63,7 +73,11 @@ Feature Design 开始时：
 5. 检查相关测试、配置开关、兼容分支和现有成熟实现模式。
 6. 记录关键代码证据位置，并区分正常路径、异常路径、边界场景和未覆盖场景。
 
-第一轮只允许只读调查和设计。不得修改业务代码、配置、数据库、接口协议或业务仓库文件；不得创建 `FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`PLAN.md` 等临时文件。所有设计与 Handoff 默认直接输出在当前 Chat。
+只有会改变 Technical Design 的关键 Current State 结论已经取得可定位的代码证据，且对应 Target State 已有 Requirement Evidence 支持时，才进入设计。Review Finding、Issue 描述、历史设计、字段名和先前结论只能作为调查线索；证据不足的部分必须保留为 Open Question，不得先形成确定方案再补证据。
+
+新证据或用户纠正推翻核心技术前提时，立即将依赖该前提的 Gap、Technical Design 和 Implementation Plan 视为失效，返回相关调用链重新调查并重建受影响范围的 Current State、Target State 与 Gap Analysis。不得只修补被指出的局部错误后继续沿用旧方案骨架。
+
+第一轮只允许调查、设计和写入外部 Feature 工作区。不得修改业务代码、配置、数据库、接口协议或业务仓库文件；不得把 `FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`HANDOFF.md` 等 Feature 资料写入业务仓库。Chat 只输出便于用户核对的摘要和外部文档位置，不再承担唯一持久化载体。
 
 ## 形成设计
 
@@ -140,6 +154,8 @@ Feature Design 开始时：
 8. Risks / Open Questions
 9. Validation Strategy
 
+以上当前有效内容必须同步写入 Feature 工作区的 `TECHNICAL_DESIGN.md`。若新证据推翻核心前提，先在 Technical Design 和 Handoff 的 `Invalidated Premises` 中记录失效前提、影响范围、替代结论与证据，再重建受影响内容；不得覆盖原始 Requirement Evidence。
+
 最后必须输出独立章节 `# IMPLEMENTATION_HANDOFF`。该章节供后续 Implementation Context 直接使用，不要求必须新建 Chat；必须自包含、紧凑、可执行，只保留已确认且与实现直接相关的信息，并包含：
 
 - `## Feature Goal`
@@ -163,4 +179,4 @@ Feature Design 开始时：
 
 Handoff 不得包含已废弃方案、中间讨论、已推翻假设、原始检索、文件读取、工具调用、调试历史、冗长代码摘录、无关调查记录、聊天历史摘要或运行时编排指令。
 
-Handoff 是设计结论和已验证 Requirement Context 的压缩载体，不替代 Requirement Evidence，也不替代当前代码。后续实现默认使用 Handoff 与 Feature Context 工作；只有相关 Hard Fact 未验证、发生冲突或实现阶段出现新的高风险歧义时，才按 Evidence Pointer 选择性回查原始需求资料。
+Handoff 是设计结论和已验证 Requirement Context 的压缩载体，不替代 Requirement Evidence，也不替代当前代码。必须将本章节写入并维护为工作区根目录的 `HANDOFF.md` 当前态。后续实现先读取 Handoff 与 `REQUIREMENT_SOURCES.md`，再按当前目标选择性读取 Technical Design、Feature Context 或 Evidence Pointer 指向的原始片段；只有相关 Hard Fact 未验证、发生冲突或出现新的高风险歧义时才扩大回查。

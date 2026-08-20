@@ -1,6 +1,6 @@
 ---
 name: feature-review
-description: 用于对已完成或部分完成的 Feature 做独立 Review。基于 Requirement Working Context、Verified Hard Facts / Evidence Pointers、Implementation Handoff、Final Diff、Relevant Current Repo、验证证据和重要设计偏差，重点检查 Requirement Correctness、Hard Fact Coverage、Scenario Coverage、Integration Correctness，并给出 READY 或 NOT READY 最终门禁。默认只 Review，不修改生产代码。
+description: 用于对已有 Feature 工作区的已完成或部分完成实现做独立 Review。基于原始 Requirement Evidence、滚动 Handoff、Verified Hard Facts、Final Diff、Current Repo 和验证证据重建结论，将最新审查写入外部 REVIEW_RESULT.md，并给出 READY 或 NOT READY；不修改生产代码。
 ---
 
 # Feature Review
@@ -26,6 +26,17 @@ Fresh Review Context 是推荐的独立性边界，不是必须创建的 Session
 不得因为 Implementation Summary、Technical Design、Implementation Handoff、历史实现过程或开发者解释而默认实现正确。可将这些信息作为调查线索，但必须用 Requirement Working Context、必要的 Requirement Evidence、Final Diff、Relevant Current Repo 和验证证据重新验证。
 
 本 Skill 默认只读 Review，不修改生产代码、配置、数据库或业务仓库文件，不自动编排 Subagent，不自动进入 Review → Fix 循环。用户明确要求修复时，将 Findings 交给 `feature-implement` 的 Review Fix Mode；是否使用 Fresh Implementation Context 由问题规模和当前 Context 状况决定。
+
+## Feature 工作区
+
+Review 属于已有正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+
+1. Feature 工作区逻辑根目录使用 `~/Documents/Codex/features/`。实际文件操作前按当前 WSL 用户解析为绝对路径；不得写死用户名、`/home/<user>` 或 `/mnt/c/Users/<user>` 等单机路径。Windows 路径仅在用户明确要求导出或定位 Windows 文件时按需转换。
+2. 新 Review Context 先读 `HANDOFF.md` 与 `REQUIREMENT_SOURCES.md`，然后按 Scope 和风险选择性读取原始 Evidence、Technical Design 与 Feature Context，不继承完整实现过程。
+3. 将最新独立审查写入 `REVIEW_RESULT.md`，并只把最新门禁状态、阻塞项和下一动作同步到 `HANDOFF.md`。
+4. 写外部 Feature 工作区不改变 Review 对生产代码、配置、数据库和业务仓库文件的只读边界。
+
+不属于已有正式需求的一次性只读 Review 不强制创建工作区，仍可只在 Chat 输出。
 
 ## Requirement Authority、事实与范围
 
@@ -156,3 +167,5 @@ Review 结束时单独进行最终需求验收，对以下各项只使用 `PASS`
 ```
 
 仅当不存在阻塞性 Finding，且完成 Feature 验收所必需的项目均为 PASS 时输出 READY。存在 FAIL 或需求完成所必需的 NOT VERIFIED 时输出 NOT READY，并列出阻止 Feature 完成的具体 blocker。不得因“没有发现代码 Bug”而跳过 Requirement Validation，也不得因 Feature Context 自身没有写出某个 Hard Fact 就跳过 Evidence 中已经明确的关键业务条件。
+
+完成 Review 后，使用插件 [REVIEW_RESULT 模板](../../assets/feature-workspace/REVIEW_RESULT.md) 更新工作区根目录的 `REVIEW_RESULT.md`：保留最新 Review 的完整证据和 Gate，在 `Review History` 中仅记录旧轮次、旧结论及失效原因。随后更新 `HANDOFF.md` 的 Review 当前态，不把 Findings 全文、工具日志或调查过程重复写入 Handoff。
