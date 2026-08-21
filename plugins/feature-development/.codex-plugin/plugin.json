@@ -1,6 +1,6 @@
 {
   "name": "feature-development",
-  "version": "0.2.0-rc.4",
+  "version": "0.2.0-rc.5",
   "description": "用于正式需求开发，以及确需多个可独立部署服务或仓库协同修改的复杂 Bug；普通单服务 Bug、线上问题和回归不创建 Feature 工作区。",
   "author": {
     "name": "Personal"
@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Feature Development",
     "shortDescription": "正式需求与跨服务复杂变更工作流。",
-    "longDescription": "自动区分 Requirement Development 与 Bug Fix：正式需求维护外部 Requirement Evidence、可选 Feature Context、当前技术设计、滚动 Handoff 与独立 Review Result；普通单服务 Bug 即使会改变当前错误业务结果，也保持轻量排查与修复，不创建 Feature 工作区。只有确实需要多个可独立部署服务或仓库协同写入修改，或 Bug 实际升级为业务规则变更时，才进入 Feature 工作流。",
+    "longDescription": "自动区分 Requirement Development 与 Bug Fix：正式需求维护外部 Requirement Evidence、可选 Feature Context、当前技术设计、滚动 Handoff 与独立 Review Result；普通单服务 Bug 即使会改变当前错误业务结果，也保持轻量排查与修复，不创建 Feature 工作区。是否跨服务按最终实际写入修改的独立服务或仓库数量判断；只读调查多个服务不会触发 Feature 工作流。只有复杂 Bug 需要跨服务协同写入修改，或 Bug 实际升级为业务规则变更时，才进入 Feature 工作流。",
     "developerName": "Personal",
     "category": "Productivity",
     "capabilities": [
@@ -19,6 +19,6 @@
     "brandColor": "#0B4FE5",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
-    "defaultPrompt": "先自动判断任务是正式需求还是 Bug。正式需求创建或复用 Feature 工作区；普通单服务 Bug 不生成 Feature 文件；只有需要多个独立服务或仓库协同修改的复杂 Bug 才升级到 Feature 工作流。"
+    "defaultPrompt": "先按任务目标自动判断是正式需求还是 Bug。目标是恢复既有正确行为时按 Bug；正式需求创建或复用 Feature 工作区。普通单服务 Bug 不生成 Feature 文件；只有需要多个独立服务或仓库协同写入修改的复杂 Bug 才升级到 Feature 工作流。"
   }
 }
