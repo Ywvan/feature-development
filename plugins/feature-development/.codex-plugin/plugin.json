@@ -1,6 +1,6 @@
 {
   "name": "feature-development",
-  "version": "0.2.0-rc.2",
+  "version": "0.2.0-rc.3",
   "description": "基于外部需求资料工作区的软件 Feature 调查设计、最小实现与独立验收工作流。",
   "author": {
     "name": "Personal"
