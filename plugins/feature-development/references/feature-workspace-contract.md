@@ -1,6 +1,52 @@
 # Feature Workspace Contract
 
-本契约适用于新增 Feature、需求迭代和业务规则变更等正式需求开发。纯诊断、解释问答、不属于既有 Feature 的一次性只读 Review，以及不改变业务行为的机械修改不强制创建工作区。
+本契约只适用于需要持久化跨阶段上下文的正式工作：新增 Feature、需求迭代、业务规则变更，以及确实需要多个可独立部署服务或多个仓库协同修改的复杂 Bug。普通单服务 Bug 排查与修复不创建 Feature 工作区。
+
+## 任务识别与工作区创建门禁
+
+创建或读取 Feature 工作区前，先判断当前任务属于 Requirement Development 还是 Bug Fix。**不得仅因为修复会改变当前业务结果，就把 Bug 自动升级为 Feature。** 如果当前行为本身就是缺陷，恢复既有正确行为仍然属于 Bug Fix。
+
+### Requirement Development
+
+满足以下语义时，优先识别为需求开发并使用 Feature 工作区：
+
+- 用户提供或引用 PRD、正式需求、原型、产品规则、Acceptance Criteria，并要求新增、调整或实现目标行为；
+- 任务目标是新增业务能力、修改既定业务规则、扩展状态 / 金额 / 权限 / 审批 / 接口契约等目标语义；
+- 需要先明确新的 Target State，再基于 Current State 设计和实现；
+- 已存在对应 Feature 工作区，当前任务明确是在继续该正式需求。
+
+需求开发不要求用户必须说出“Feature”字样；应根据任务目标和需求资料自动识别。
+
+### Bug Fix
+
+满足以下语义时，优先识别为 Bug Fix：
+
+- 用户描述失败、异常、报错、回归、结果不正确、线上问题或已有功能没有按预期工作；
+- 目标是定位根因并恢复已经存在或已经确定的正确行为，而不是新增产品规则；
+- 正确行为能够从现有产品语义、当前有效需求、历史兼容约束或成熟实现中确认。
+
+以下单服务 Bug 默认**不创建、不初始化、不补齐** Feature 工作区，也不生成 `REQUIREMENT_SOURCES.md`、`FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`HANDOFF.md` 或 `REVIEW_RESULT.md`：
+
+- 单服务 / 单仓库线上 Bug；
+- 单点回归；
+- 单个 Review Finding 的修复；
+- 已有条件、状态、金额、SQL、权限或异常处理实现错误；
+- 纯诊断、根因排查和一次性修复。
+
+“单服务 / 多服务”按**完成修复实际需要写入修改的可独立部署服务或仓库数量**判断，不按调查读取范围判断。为了确认调用链、接口契约或数据流而只读检查多个服务，不会把单服务 Bug 升级成多服务 Feature 工作流。
+
+### Bug 升级为 Feature 工作流
+
+Bug 只有满足以下任一条件时才允许升级并创建 Feature 工作区：
+
+1. 根因调查确认不能只恢复既有行为，而是必须新增或改变业务规则、接口契约、Target State 或 Acceptance Criteria；
+2. 完成修复确实需要在两个或以上可独立部署服务 / 仓库中协同写入修改，并需要维护跨服务契约、发布顺序或跨阶段 Handoff；
+3. 当前 Bug 明确属于一个已经存在的正式 Feature 工作区，需要继续该 Feature；
+4. 用户明确要求使用 Feature 工作流或持久化设计 / Handoff。
+
+如果任务性质或最终修改范围尚不确定，**默认先不创建工作区**，只做足以判断根因和修改边界的只读调查。只有取得满足上述升级条件的证据后才创建或复用 Feature 工作区。不得为了“可能以后会复杂”提前生成文件。
+
+纯诊断、解释问答、不属于既有 Feature 的一次性只读 Review、不改变业务行为的机械修改，以及未满足升级条件的单服务 Bug 均不强制也不建议创建工作区。
 
 ## 路径与目录
 
@@ -63,9 +109,9 @@ Requirement Evidence 和用户最新确认是需求事实源。当前代码决�
 
 ## 阶段边界
 
-- Design：创建或识别工作区，保真保存需求，按需生成 Feature Context，写入 Technical Design 并初始化或更新 Handoff。业务仓库、代码、配置和数据库保持只读。
-- Implement：先读 Handoff、Requirement Sources 和当前真实代码，按需回查设计与 Evidence；只修改实现目标所必需的业务文件，并在里程碑和交付前更新外部 Handoff。不得修改原始需求证据。
-- Review：独立重建结论，业务仓库、生产代码、配置和数据库保持只读；Review 结果只写入外部 `REVIEW_RESULT.md`，并将最新门禁、阻塞项和下一动作同步到 Handoff。
+- Design：仅在通过工作区创建门禁后创建或识别工作区，保真保存需求，按需生成 Feature Context，写入 Technical Design 并初始化或更新 Handoff。业务仓库、代码、配置和数据库保持只读。
+- Implement：仅对已有 Feature 工作区或已通过升级条件的跨服务 Bug 使用；先读 Handoff、Requirement Sources 和当前真实代码，按需回查设计与 Evidence；只修改实现目标所必需的业务文件，并在里程碑和交付前更新外部 Handoff。不得修改原始需求证据。
+- Review：独立重建结论，业务仓库、生产代码、配置和数据库保持只读；属于正式 Feature 时将 Review 结果写入外部 `REVIEW_RESULT.md` 并同步 Handoff；普通一次性 Bug Review 不创建工作区。
 
 外部工作区的文档写入不授权修改业务仓库或扩大业务 Scope。任何阶段发现新证据推翻核心前提时，都必须停止沿用受影响方案，回到必要的只读调查并更新当前有效设计；不得只修补局部错误后继续保留失效骨架。
 
