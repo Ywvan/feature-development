@@ -1,6 +1,6 @@
 ---
 name: feature-design
-description: 用于正式软件 Feature 的需求资料保真、代码调查和技术设计。在外部 Feature 工作区维护 Requirement Evidence、当前技术设计与滚动 Handoff；仅在确有压缩价值时生成 FEATURE_CONTEXT。默认不修改业务代码。
+description: 用于正式软件 Feature 的需求开发，或确实需要多个可独立部署服务 / 仓库协同修改的复杂 Bug 的调查与技术设计。普通单服务 Bug、线上问题、回归和单点修复不得仅因“会改变业务结果”而进入本 Skill，也不得生成 Feature 工作区文件。
 ---
 
 # Feature Design
@@ -11,9 +11,25 @@ description: 用于正式软件 Feature 的需求资料保真、代码调查和�
 
 本 Skill 只负责调查与设计，不修改业务代码，不自动进入实现或 Review，也不规定 Codex 的搜索顺序、工具选择、Task、Context、Session 或 Subagent 策略。
 
+## 使用门禁
+
+在初始化 Feature 工作区之前，先判断任务类型：
+
+- **Requirement Development**：用户要求新增、调整或实现业务能力 / 业务规则，通常有 PRD、正式需求、原型、产品规则、Acceptance Criteria 或明确的新 Target State。此类任务自动使用本 Skill，不要求用户必须说出“Feature”。
+- **Single-Service Bug Fix**：用户描述失败、异常、报错、回归、结果错误或已有功能未按预期工作，目标是恢复已经存在或已经确定的正确行为，且最终修复只需要修改一个可独立部署服务 / 仓库。此类任务不得创建 Feature 工作区，应回到普通轻量 Bug 调查 / 修复流程。
+- **Cross-Service Bug Fix**：Bug 最终确认需要修改两个或以上可独立部署服务 / 仓库，并需要协调接口契约、发布顺序或跨阶段 Handoff 时，可以使用本 Skill。
+
+“是否跨服务”按最终需要写入修改的服务 / 仓库数量判断，不按只读调查范围判断。为确认调用链而读取多个服务，最终只改一个服务，仍然是 Single-Service Bug Fix。
+
+如果当前无法确认是需求还是 Bug，或无法确认最终是否跨服务，默认先不创建工作区，只做足以判断根因和修改边界的只读调查。只有证据表明属于 Requirement Development 或满足 Cross-Service Bug Fix 条件后，才进入本 Skill 的工作区流程。
+
+如果本 Skill 已被误触发，而调查确认当前只是 Single-Service Bug Fix：立即停止 Feature 工作区初始化，不创建或补齐 `REQUIREMENT_SOURCES.md`、`FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`HANDOFF.md` 或 `REVIEW_RESULT.md`，并回到普通 Bug 调查 / 修复流程。
+
+单服务 Bug 只有在调查后确认必须新增或改变业务规则、接口契约、Target State / Acceptance Criteria，已经属于现有正式 Feature，或用户明确要求持久化 Feature 资料时，才允许升级为 Feature 工作流。
+
 ## Feature 工作区
 
-处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+只有通过上述使用门禁后，才完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
 
 - Feature 工作区根目录必须按 Contract 的运行时解析规则确定；不得在 Skill 中写死 Windows、WSL、Linux 路径、用户名、盘符、home 目录或挂载点。
 - 在总结或设计前，先保真保存 Chat 原文和可获得的原始附件，并登记 `REQUIREMENT_SOURCES.md`。原始资料不得被派生文档覆盖或静默改写。
@@ -56,7 +72,7 @@ description: 用于正式软件 Feature 的需求资料保真、代码调查和�
 
 ### 4. Technical Design
 
-给出实现 Target State 的最小必要方案：
+给出实现 Target State 所需的最小必要方案：
 
 - 优先复用项目已有成熟模式；
 - 只修改与 Gap 直接相关的代码和配置；
