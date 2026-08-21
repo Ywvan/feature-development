@@ -15,7 +15,7 @@ Review 默认只读。Technical Design、Implementation Handoff、实现说明�
 
 Review 属于已有正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
 
-- 复用 `~/Documents/Codex/features/` 下的对应需求目录；按当前 WSL 用户解析 `~`，不得写死用户名或机器路径，也不得改用 `~/.codex/features/`。
+- Feature 工作区根目录必须按 Contract 的运行时解析规则确定；不得在 Skill 中写死 Windows、WSL、Linux 路径、用户名、盘符、home 目录或挂载点。
 - 先读 `HANDOFF.md` 与 `REQUIREMENT_SOURCES.md`，再按 Review Scope 和风险选择性读取原始 Evidence、Technical Design 与 Feature Context；不得直接继承实现过程作为结论。
 - 将最新独立审查写入外部 `REVIEW_RESULT.md`，并只把最新门禁、阻塞项和下一动作同步到 `HANDOFF.md`。
 - Review 期间业务仓库、生产代码、配置和数据库保持只读；写外部文档不改变这一边界。
