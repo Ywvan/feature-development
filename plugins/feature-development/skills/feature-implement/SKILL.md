@@ -1,6 +1,6 @@
 ---
 name: feature-implement
-description: 基于外部 Feature 工作区的 Requirement Evidence、当前技术设计、滚动 Handoff 与当前代码完成正式 Feature 实现，也用于处理已验证的 Review Finding。只做完成目标所需的最小必要修改、验证并更新 Handoff。
+description: 基于已有外部 Feature 工作区完成正式需求实现，或处理已确认需要多个可独立部署服务 / 仓库协同修改的复杂 Bug。普通单服务 Bug、线上问题、回归和单点修复不应为了实现而新建 Feature 工作区。
 ---
 
 # Feature Implement
@@ -11,9 +11,26 @@ description: 基于外部 Feature 工作区的 Requirement Evidence、当前技�
 
 本 Skill 不规定 Codex 的搜索顺序、工具、Task、Context、Session 或 Subagent 策略。当前代码决定技术事实；需求事实仍以用户最新确认和当前有效需求资料为准。
 
+## 使用门禁
+
+进入本 Skill 前先确认至少满足一项：
+
+1. 当前任务属于正式 Requirement Development，并且已有或应该创建 Feature 工作区；
+2. 当前 Bug 已确认需要在两个或以上可独立部署服务 / 仓库中协同写入修改，需要维护接口契约、发布顺序或跨阶段 Handoff；
+3. 当前任务明确属于一个已经存在的正式 Feature 工作区；
+4. 用户明确要求使用 Feature 工作流或持久化设计 / Handoff。
+
+普通 Single-Service Bug Fix 不满足以上条件。即使修复会改变当前错误的业务结果，只要目标是恢复已经存在或已经确定的正确行为，且最终只修改一个可独立部署服务 / 仓库，就不得为此创建或补齐 Feature 工作区。
+
+“单服务 / 多服务”按最终实际写入修改的服务 / 仓库数量判断，不按只读调查范围判断。只读检查多个服务但最终只改一个服务，仍按 Single-Service Bug Fix 处理。
+
+如果本 Skill 已被误触发，而当前没有既有 Feature 工作区且调查确认只是 Single-Service Bug Fix：停止 Feature 工作区初始化，不生成 `REQUIREMENT_SOURCES.md`、`FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`HANDOFF.md` 或 `REVIEW_RESULT.md`，改用普通轻量 Bug 修复流程。
+
+单服务 Bug 在修复过程中只有确认必须新增 / 修改业务规则、接口契约、Target State / Acceptance Criteria，或实际写入范围扩展到两个及以上独立服务 / 仓库时，才升级为 Feature 工作流。
+
 ## Feature 工作区
 
-处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+只有通过上述使用门禁后，才完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
 
 - Feature 工作区根目录必须按 Contract 的运行时解析规则确定；不得在 Skill 中写死 Windows、WSL、Linux 路径、用户名、盘符、home 目录或挂载点。
 - 优先识别并复用已有需求目录。若正式需求没有工作区，先补齐原始 Requirement Evidence、`REQUIREMENT_SOURCES.md`、最小 `TECHNICAL_DESIGN.md` 与 `HANDOFF.md`，再编辑业务代码。
@@ -57,6 +74,8 @@ Feature 文档只写入外部工作区，不写入业务仓库。外部文档写
 3. Finding 不成立时不修改，直接给出代码证据和结论。
 4. Finding 成立时再定位根因并设计最小修复。
 5. 修复后检查相关正常、异常和边界路径，避免局部修复破坏原有行为。
+
+如果 Review Finding 属于普通单服务 Bug 且不属于已有 Feature，不因为 Finding 来自 Review 就创建 Feature 工作区。
 
 不要因为 Review 已给出风险等级、风险编号或修复建议，就跳过重新验证。
 
