@@ -15,7 +15,7 @@ description: 用于正式软件 Feature 的需求资料保真、代码调查和�
 
 处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
 
-- 在逻辑根目录 `~/Documents/Codex/features/` 下创建或复用独立需求目录；实际操作时按当前 WSL 用户解析 `~`，不得写死用户名或机器路径，也不得改用 `~/.codex/features/`。
+- Feature 工作区根目录必须按 Contract 的运行时解析规则确定；不得在 Skill 中写死 Windows、WSL、Linux 路径、用户名、盘符、home 目录或挂载点。
 - 在总结或设计前，先保真保存 Chat 原文和可获得的原始附件，并登记 `REQUIREMENT_SOURCES.md`。原始资料不得被派生文档覆盖或静默改写。
 - `FEATURE_CONTEXT.md` 仅是可选的派生 Working Context；单一清晰需求不机械生成。
 - 将当前有效设计写入 `TECHNICAL_DESIGN.md`，将跨阶段当前态写入 `HANDOFF.md`。
