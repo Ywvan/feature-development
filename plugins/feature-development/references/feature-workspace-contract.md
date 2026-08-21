@@ -6,6 +6,8 @@
 
 创建或读取 Feature 工作区前，先判断当前任务属于 Requirement Development 还是 Bug Fix。**不得仅因为修复会改变当前业务结果，就把 Bug 自动升级为 Feature。** 如果当前行为本身就是缺陷，恢复既有正确行为仍然属于 Bug Fix。
 
+如果一个任务同时具有“Bug 表现”和“需求资料”，以**任务目标**而不是资料类型或标题判断：目标是恢复已经存在 / 已经确定的正确行为时，仍按 Bug Fix；只有目标需要新增或改变产品应有语义时，才按 Requirement Development。读取 PRD、历史需求或产品规则来确认 Bug 的预期行为，本身不会把 Bug 升级为 Feature。
+
 ### Requirement Development
 
 满足以下语义时，优先识别为需求开发并使用 Feature 工作区：
