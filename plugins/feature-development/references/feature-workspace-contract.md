@@ -8,7 +8,8 @@
 - 根目录必须在运行时按以下优先级解析：
   1. 若环境变量 `CODEX_FEATURES_DIR` 已设置且非空，使用其解析后的绝对路径；这是显式覆盖项。
   2. 否则若 `CODEX_HOME` 已设置且非空，在其下使用 `features/`。
-  3. 否则使用当前运行环境实际解析出的用户 home 目录，在其 Codex 用户目录下使用 `features/`；home 必须由当前 OS / Runtime 解析，不得自行拼接用户名或盘符。
+  3. 否则使用 `~/.codex/features/`；其中 `~` 必须由当前 OS / Runtime 解析为当前用户 home，禁止自行拼接用户名、盘符或 WSL 挂载路径。
+- 默认 fallback 的实际结果示例：Windows 原生通常为 `%USERPROFILE%\.codex\features\`，WSL / Linux 通常为 `~/.codex/features/`。这些只是运行时解析结果示例，不得把示例中的用户名、盘符或绝对路径写入 Skill。
 - 所有路径拼接、标准化和绝对路径解析都使用当前平台原生路径语义或标准路径 API；不得手工把 Windows 路径改写成 `/mnt/c/...`，也不得把 WSL / POSIX 路径强行改写成 `C:\...`。
 - Windows 原生、WSL 和其他 POSIX 环境都遵守同一解析顺序。若用户希望 Windows 与 WSL 指向同一个物理工作区，应通过各自环境中的 `CODEX_FEATURES_DIR` 显式指定等价位置，而不是在 Skill 中推断 Windows 用户名、盘符或挂载点。
 - 显式设置的 `CODEX_FEATURES_DIR` 或 `CODEX_HOME` 无法解析、不可访问或不可写时，应明确报告并停止写入，不得静默回退到另一个目录导致资料分散。
