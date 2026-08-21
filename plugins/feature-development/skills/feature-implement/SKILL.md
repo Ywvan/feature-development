@@ -15,7 +15,7 @@ description: 基于外部 Feature 工作区的 Requirement Evidence、当前技�
 
 处理正式需求时，先完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
 
-- 工作区逻辑根目录为 `~/Documents/Codex/features/`；按当前 WSL 用户解析 `~`，不得写死用户名或机器路径，也不得改用 `~/.codex/features/`。
+- Feature 工作区根目录必须按 Contract 的运行时解析规则确定；不得在 Skill 中写死 Windows、WSL、Linux 路径、用户名、盘符、home 目录或挂载点。
 - 优先识别并复用已有需求目录。若正式需求没有工作区，先补齐原始 Requirement Evidence、`REQUIREMENT_SOURCES.md`、最小 `TECHNICAL_DESIGN.md` 与 `HANDOFF.md`，再编辑业务代码。
 - 新阶段先读 `HANDOFF.md` 和 `REQUIREMENT_SOURCES.md`，再按当前目标选择性读取 Technical Design、Feature Context 或 Evidence Pointer 指向的原始片段。
 - 原始需求只追加新 Evidence 或更新来源状态，不覆盖旧证据。Feature Context、设计和 Handoff 都不能成为新的需求事实源。
