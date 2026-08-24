@@ -70,6 +70,8 @@ Design、Implement 和 Review 对关键 Current State、根因、高风险 Findi
 
 搜索未命中、暂未发现证据或“当前没看到”不构成反证。竞争性假设检查不等于必须持久化；多数替代解释在调查结束后无需进入 Handoff。
 
+Rejected Hypothesis（已排除假设）只表示“调查过但未采用的替代解释”。如果某个前提曾被当作成立事实用于设计或实现，后来被新证据推翻，应记录为 Invalidated Premise（失效前提），不要放入已排除假设表。
+
 ## 文档职责
 
 ### TECHNICAL_DESIGN.md
