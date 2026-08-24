@@ -49,31 +49,44 @@ YYYYMMDD-[需求编号-]需求简称/
 
 关键词 search / find 只能作为 Evidence 定位入口，不能作为需求完整性结论；“没有命中关键词”不能证明某项业务规则不存在。对会直接改变 Feature 结果的 Hard Fact，仍需结合 Scope、Acceptance Criteria、状态矩阵、规则表或对应需求章节做结构性核对。
 
-## Evidence Closure 与 Rejected Hypothesis 边界
+## Evidence Closure Gate（证据闭环门槛）与 Rejected Hypothesis（已排除假设）
 
-Design、Implement 和 Review 对关键 Current State、根因、高风险 Finding 或 Final Gate 形成确定结论前，不能把“存在一条支持证据”等同于“证据已经闭环”。至少需要确认实际入口/触发路径、决定结果的关键分支、关键数据或状态的结果路径，并检查最可能推翻当前解释的主要替代假设；不存在合理替代假设时应明确原因。
+Design、Implement 和 Review 对关键 Current State、根因、高风险 Finding 或 Final Gate 形成确定结论前，必须确认实际入口/触发路径、决定结果的关键分支、关键数据或状态的结果路径，并执行 Competing Hypothesis Check（竞争性假设检查）。单个 grep 命中、单一调用点、单条日志、单个 SQL 片段或一条能够解释现象的路径，不能单独构成闭环证据。
 
-单个 grep 命中、单一调用点、单条日志、单个 SQL 片段或一条能够解释现象的路径，均不能单独作为上述关键结论的闭环证据。未验证且可能改变结论的事项必须保留为 Open Question / NOT VERIFIED。
+竞争性假设检查只评估最可能推翻当前解释的主要替代解释；不存在合理替代解释时说明原因，不为形式完整制造假设。结果按证据处理：
 
-Rejected Hypothesis 只保存高价值反证：该假设曾是主要候选、已有明确排除证据，且后续重新采用会显著改变设计、实现或 Review 结论。每项至少保存 Hypothesis、Rejected By、Evidence 和 Reopen If。普通搜索失败、试错、低价值猜想和完整推理历史不保存。
+- 替代解释被支持：当前主要解释失效，继续调查；
+- 证据不足：标记 `NOT VERIFIED（未验证）` / `Open Question（待确认项）`，不得写成已排除；
+- 替代解释被直接反证：只有满足下列全部条件，才可跨阶段保存为 Rejected Hypothesis（已排除假设）。
+
+持久化准入条件：
+
+1. 曾是当前问题的主要候选；
+2. 若成立会实质改变设计、实现或 Review 结论；
+3. 已实际检查，而非仅凭推测；
+4. 存在直接 Falsifying Evidence（反证）；
+5. Rejected Scope（排除范围）明确；
+6. Reopen If（重新调查条件）具体且可观察。
+
+搜索未命中、暂未发现证据或“当前没看到”不构成反证。竞争性假设检查不等于必须持久化；多数替代解释在调查结束后无需进入 Handoff。
 
 ## 文档职责
 
 ### TECHNICAL_DESIGN.md
 
-保存当前有效的 Requirement Verification、Current State、Target State、Gap Analysis、Technical Design、Implementation Plan、Validation Strategy、Risks / Open Questions、少量高价值 Rejected Hypotheses 和失效前提。业务规则必须回指 Requirement Evidence，Current State 必须回指当前代码。
+保存当前有效的 Requirement Verification、Current State、Target State、Gap Analysis、Technical Design、Implementation Plan、Validation Strategy、Risks / Open Questions、按上述准入条件保留的少量 Rejected Hypotheses（已排除假设）和失效前提。业务规则必须回指 Requirement Evidence，Current State 必须回指当前代码。
 
 核心前提失效时，将依赖该前提的设计状态改为 `INVALIDATED`，重新调查并更新当前有效设计；在 `Invalidated Premises` 中只保留失效前提、影响范围、替代结论和证据，不保留冗长讨论历史。
 
 ### HANDOFF.md
 
-Handoff 是跨阶段唯一的滚动当前态入口。它只保留当前阶段、状态、Feature Goal、Verified Hard Facts、Evidence Pointers、有效技术决策、少量高价值 Rejected Hypotheses、代码基线、修改状态、验证结果、阻塞项、下一动作及精简失效记录。
+Handoff 是跨阶段唯一的滚动当前态入口。它只保留当前阶段、状态、Feature Goal、Verified Hard Facts、Evidence Pointers、有效技术决策、少量已排除假设、代码基线、修改状态、验证结果、阻塞项、下一动作及精简失效记录。
 
-更新时替换已经过期的当前态，不追加工具日志、原始搜索、调试过程、大段代码、聊天摘要、低价值已推翻猜想或废弃方案。高价值 Rejected Hypothesis 必须保留排除证据和 Reopen If；Reopen If 条件成立时，不得继续把该假设视为已排除。后续阶段先读 Handoff，再按 Evidence Pointer、风险或 Reopen If 条件选择性读取其他资料；Handoff 不替代原始需求和当前代码。
+更新时替换已经过期的当前态，不追加工具日志、原始搜索、调试过程、大段代码、聊天摘要、低价值已推翻猜想或废弃方案。已排除假设只保留 `Hypothesis（假设） / Rejected Scope（排除范围） / Falsifying Evidence（反证） / Reopen If（重新调查条件）`；重新调查条件成立时，该排除结论立即失效。
 
 ### REVIEW_RESULT.md
 
-保存最新一轮独立 Review 的基线、Requirement Gate、Findings、验证证据和 `READY` / `NOT READY`。复审时更新当前结果，并在 `Review History` 中保留轮次、时间、旧结论及失效原因的短记录。Handoff 只同步最新门禁、阻塞项和下一动作。
+保存最新一轮独立 Review 的基线、Requirement Gate、Findings、验证证据、适用的少量已排除假设和 `READY` / `NOT READY`。复审时更新当前结果，并在 `Review History` 中保留轮次、时间、旧结论及失效原因的短记录。Handoff 只同步最新门禁、阻塞项和下一动作。
 
 ## 阶段写入边界
 
@@ -89,5 +102,5 @@ Handoff 是跨阶段唯一的滚动当前态入口。它只保留当前阶段、
 - 新阶段先读取 `HANDOFF.md` 与 `REQUIREMENT_SOURCES.md`。
 - 仅按当前目标读取 `TECHNICAL_DESIGN.md` 的相关章节、Feature Context 或 Evidence Pointer 指向的原始片段。
 - 不因资料已落盘就同时灌入完整 Chat、全部原始文档、全部设计和工具历史。
-- Rejected Hypotheses 只保留高价值反证，不得演变成完整调查历史。
+- Rejected Hypotheses（已排除假设）仅保留满足准入条件的高价值反证，不得演变成完整调查历史。
 - Token 是否降低必须用同类任务的实际上下文与正确性验证衡量，不承诺固定比例。
