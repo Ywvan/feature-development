@@ -34,9 +34,9 @@
 
 {{IMPLEMENTATION_PLAN}}
 
-## Rejected Hypotheses
+## Rejected Hypotheses（已排除假设）
 
-| Hypothesis | Rejected By | Evidence | Reopen If |
+| Hypothesis（假设） | Rejected Scope（排除范围） | Falsifying Evidence（反证） | Reopen If（重新调查条件） |
 |---|---|---|---|
 {{HIGH_VALUE_REJECTED_HYPOTHESES_OR_NONE}}
 
