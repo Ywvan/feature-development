@@ -34,6 +34,12 @@
 
 {{IMPLEMENTATION_PLAN}}
 
+## Rejected Hypotheses
+
+| Hypothesis | Rejected By | Evidence | Reopen If |
+|---|---|---|---|
+{{HIGH_VALUE_REJECTED_HYPOTHESES_OR_NONE}}
+
 ## Validation Strategy
 
 {{VALIDATION_STRATEGY}}

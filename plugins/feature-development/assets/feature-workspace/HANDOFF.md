@@ -38,6 +38,12 @@
 
 {{CURRENT_VALID_DECISIONS}}
 
+## Rejected Hypotheses
+
+| Hypothesis | Rejected By | Evidence | Reopen If |
+|---|---|---|---|
+{{HIGH_VALUE_REJECTED_HYPOTHESES_OR_NONE}}
+
 ## Modification State / Design Deviations
 
 {{MODIFIED_AREAS_AND_INTENTIONAL_DEVIATIONS}}

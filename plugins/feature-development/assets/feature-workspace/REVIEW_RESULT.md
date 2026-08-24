@@ -31,6 +31,12 @@
 
 {{VERIFICATION_EVIDENCE}}
 
+## Rejected Hypotheses / Alternative Explanations
+
+| Hypothesis | Rejected By | Evidence | Reopen If |
+|---|---|---|---|
+{{HIGH_VALUE_REJECTED_HYPOTHESES_OR_NONE}}
+
 ## Final Gate
 
 `{{READY_OR_NOT_READY}}`

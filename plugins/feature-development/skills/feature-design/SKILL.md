@@ -67,13 +67,30 @@ Feature Design 开始时：
 严格先调查，再设计：
 
 1. 搜索并定位与 Scope 相关的真实入口，不因文件名、类名、方法名或局部 grep 结果直接下结论。
-2. 阅读入口实现并沿调用链向上下游追踪，直到证据足以解释实际业务行为。
+2. 阅读入口实现并沿调用链向上下游追踪，验证实际触发路径、决定结果的关键分支以及最终结果位置。
 3. 追踪关键参数、状态、金额、权限和结果的数据流，包括创建、转换、持久化、读取、回调和消费位置。
 4. 按实际影响检查数据库、SQL、事务、缓存、RPC、MQ、Job、异步任务和外部接口；不机械扩大无关范围。
 5. 检查相关测试、配置开关、兼容分支和现有成熟实现模式。
 6. 记录关键代码证据位置，并区分正常路径、异常路径、边界场景和未覆盖场景。
 
-只有会改变 Technical Design 的关键 Current State 结论已经取得可定位的代码证据，且对应 Target State 已有 Requirement Evidence 支持时，才进入设计。Review Finding、Issue 描述、历史设计、字段名和先前结论只能作为调查线索；证据不足的部分必须保留为 Open Question，不得先形成确定方案再补证据。
+### Evidence Closure Gate
+
+“已经找到一条能解释现象的证据”不等于“关键 Current State 已经闭环”。
+
+对会改变 Technical Design、根因判断、关键 Gap、状态/金额/权限结果或高风险兼容行为的结论，在停止调查并进入设计前至少确认：
+
+1. 与当前问题相关的真实入口或实际触发路径；
+2. 决定结果的关键分支 / 条件；
+3. 关键数据或状态从生产、转换到最终结果位置的路径；
+4. 当前主要解释；
+5. 至少检查一个最可能推翻当前解释的竞争性假设；若不存在合理竞争性假设，明确说明原因；
+6. 未验证且可能改变结论的事项保留为 Open Question / NOT VERIFIED。
+
+单个 grep 命中、单一调用点、单条日志、单个 SQL 片段或一条能够解释现象的调用路径，均不能单独构成上述关键结论的调查闭环。
+
+被明确证据排除且后续阶段重新采用会改变设计或实现方向的主要假设，记录为 `Rejected Hypothesis`，至少保留：Hypothesis、Rejected By、Evidence、Reopen If。不要记录所有搜索失败、试错或低价值猜想。
+
+只有会改变 Technical Design 的关键 Current State 结论已经通过上述 Closure Gate，并取得可定位的代码证据，且对应 Target State 已有 Requirement Evidence 支持时，才进入设计。Review Finding、Issue 描述、历史设计、字段名和先前结论只能作为调查线索；证据不足的部分必须保留为 Open Question，不得先形成确定方案再补证据。
 
 新证据或用户纠正推翻核心技术前提时，立即将依赖该前提的 Gap、Technical Design 和 Implementation Plan 视为失效，返回相关调用链重新调查并重建受影响范围的 Current State、Target State 与 Gap Analysis。不得只修补被指出的局部错误后继续沿用旧方案骨架。
 
@@ -137,7 +154,7 @@ Feature Design 开始时：
 - Task 边界不等于 Session 边界；设计阶段的信息量可以较大，但交付给实现阶段的 Handoff 应保持小而完整；
 - 仅当阶段切换、上下文已被大量无效检索或调试污染、过时方案难以剥离、目标持续被稀释时，才建议使用 Fresh Context；不得把新建 Chat 设为固定流程；
 - Workstream 边界不等于 Context 边界。是否隔离上下文由认知负载决定，不由文件数量或模块数量机械决定；
-- Handoff 只压缩仍然有效的事实、决策、约束和验收契约，不携带过程噪音；
+- Handoff 只压缩仍然有效的事实、决策、约束、验收契约以及少量高价值 Rejected Hypotheses，不携带过程噪音；
 - 与实现直接相关的 Hard Facts 必须保留精确语义和 Evidence Pointer，不能再次压缩成“状态满足规则”“金额符合要求”等失去决策条件的描述。
 
 ## 输出要求
@@ -151,8 +168,9 @@ Feature Design 开始时：
 5. Technical Design
 6. Implementation Plan
 7. Suggested Implementation Workstreams（仅在确有必要时）
-8. Risks / Open Questions
-9. Validation Strategy
+8. Rejected Hypotheses（仅保留会显著改变后续判断的主要已排除假设）
+9. Risks / Open Questions
+10. Validation Strategy
 
 以上当前有效内容必须同步写入 Feature 工作区的 `TECHNICAL_DESIGN.md`。若新证据推翻核心前提，先在 Technical Design 和 Handoff 的 `Invalidated Premises` 中记录失效前提、影响范围、替代结论与证据，再重建受影响内容；不得覆盖原始 Requirement Evidence。
 
@@ -168,6 +186,7 @@ Feature Design 开始时：
 - `## Target State`
 - `## Key Gaps`
 - `## Technical Decisions`
+- `## Rejected Hypotheses`（仅高价值项，包含排除证据与 Reopen If）
 - `## Compatibility Constraints`
 - `## Relevant Code Areas`
 - `## Suggested Implementation Workstreams`（仅在确有必要时）
@@ -177,6 +196,8 @@ Feature Design 开始时：
 
 `Verified Hard Facts` 仅保留与实现直接相关的高风险事实；每项至少包含 ID、精确 Fact、Verification Status 和对应 Evidence Pointer。若事实来自 Evidence Discovery 且原 Feature Context 漏失，保留 `Context Gap` 标记。`Evidence Pointers` 只保存必要定位信息，不复制大段原始资料。
 
-Handoff 不得包含已废弃方案、中间讨论、已推翻假设、原始检索、文件读取、工具调用、调试历史、冗长代码摘录、无关调查记录、聊天历史摘要或运行时编排指令。
+`Rejected Hypotheses` 不是调查历史。只保留曾是主要候选、已经有明确反证、后续重新采用会显著改变设计/实现方向的假设，并记录 `Hypothesis / Rejected By / Evidence / Reopen If`。没有此类假设时写 `None`。
 
-Handoff 是设计结论和已验证 Requirement Context 的压缩载体，不替代 Requirement Evidence，也不替代当前代码。必须将本章节写入并维护为工作区根目录的 `HANDOFF.md` 当前态。后续实现先读取 Handoff 与 `REQUIREMENT_SOURCES.md`，再按当前目标选择性读取 Technical Design、Feature Context 或 Evidence Pointer 指向的原始片段；只有相关 Hard Fact 未验证、发生冲突或出现新的高风险歧义时才扩大回查。
+Handoff 不得包含低价值或过程性的已推翻猜想、已废弃方案、中间讨论、原始检索、文件读取、工具调用、调试历史、冗长代码摘录、无关调查记录、聊天历史摘要或运行时编排指令。
+
+Handoff 是设计结论和已验证 Requirement Context 的压缩载体，不替代 Requirement Evidence，也不替代当前代码。必须将本章节写入并维护为工作区根目录的 `HANDOFF.md` 当前态。后续实现先读取 Handoff 与 `REQUIREMENT_SOURCES.md`，再按当前目标选择性读取 Technical Design、Feature Context 或 Evidence Pointer 指向的原始片段；只有相关 Hard Fact 未验证、发生冲突、出现新的高风险歧义，或 Reopen If 条件成立时才扩大回查。
