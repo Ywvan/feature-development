@@ -1,6 +1,6 @@
 {
   "name": "feature-development",
-  "version": "0.1.3+codex.20260824115700",
+  "version": "0.1.4+codex.20260824121500",
   "description": "使用外部需求资料工作区完成软件 Feature 的保真需求管理、调查设计、实现与独立验收。",
   "author": {
     "name": "Personal"
