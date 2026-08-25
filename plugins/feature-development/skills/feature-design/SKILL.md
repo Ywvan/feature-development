@@ -1,120 +1,83 @@
 ---
 name: feature-design
-description: 用于正式软件 Feature 的需求开发，或确实需要多个可独立部署服务 / 仓库协同修改的复杂 Bug 的调查与技术设计。普通单服务 Bug、线上问题、回归和单点修复不得仅因“会改变业务结果”而进入本 Skill，也不得生成 Feature 工作区文件。
+description: 用于已经满足 Feature Workspace Contract 门禁的正式需求或复杂跨服务变更的调查与技术设计；普通单服务 Bug、一次性诊断和一次性只读 Review 不使用本 Skill。
 ---
 
 # Feature Design
 
 ## Goal
 
-正确理解需求和当前代码，给出可以落地的最小技术方案。
+把当前有效需求和当前代码事实整理成可执行技术设计，并形成后续阶段可复用的 Feature 状态。
 
-本 Skill 只负责调查与设计，不修改业务代码，不自动进入实现或 Review，也不规定 Codex 的搜索顺序、工具选择、Task、Context、Session 或 Subagent 策略。
+本 Skill 只负责 Feature Design 阶段，不定义通用调查方法、修改范围规则、Review 规则、SQL / 日志 / 注释规范、测试策略或 Agent 执行策略。
 
-## 使用门禁
+## Feature 工作区门禁
 
-在初始化 Feature 工作区之前，先判断任务类型：
+任务是否进入 Feature 工作流、是否创建或复用工作区，只以 [Feature Workspace Contract](../../references/feature-workspace-contract.md) 为准。
 
-- **Requirement Development**：用户要求新增、调整或实现业务能力 / 业务规则，通常有 PRD、正式需求、原型、产品规则、Acceptance Criteria 或明确的新 Target State。此类任务自动使用本 Skill，不要求用户必须说出“Feature”。
-- **Single-Service Bug Fix**：用户描述失败、异常、报错、回归、结果错误或已有功能未按预期工作，目标是恢复已经存在或已经确定的正确行为，且最终修复只需要修改一个可独立部署服务 / 仓库。此类任务不得创建 Feature 工作区，应回到普通轻量 Bug 调查 / 修复流程。
-- **Cross-Service Bug Fix**：Bug 最终确认需要修改两个或以上可独立部署服务 / 仓库，并需要协调接口契约、发布顺序或跨阶段 Handoff 时，可以使用本 Skill。
+先读取 Contract 的任务门禁。未通过门禁时，不初始化 Feature 工作区，也不继续执行本 Skill 的阶段流程。
 
-“是否跨服务”按最终需要写入修改的服务 / 仓库数量判断，不按只读调查范围判断。为确认调用链而读取多个服务，最终只改一个服务，仍然是 Single-Service Bug Fix。
+通过门禁后，再读取 Contract 中与当前 Design 阶段相关的工作区、Requirement Evidence、派生文档和 Handoff 规则。
 
-如果当前无法确认是需求还是 Bug，或无法确认最终是否跨服务，默认先不创建工作区，只做足以判断根因和修改边界的只读调查。只有证据表明属于 Requirement Development 或满足 Cross-Service Bug Fix 条件后，才进入本 Skill 的工作区流程。
+## Design 输入
 
-如果本 Skill 已被误触发，而调查确认当前只是 Single-Service Bug Fix：立即停止 Feature 工作区初始化，不创建或补齐 `REQUIREMENT_SOURCES.md`、`FEATURE_CONTEXT.md`、`TECHNICAL_DESIGN.md`、`HANDOFF.md` 或 `REVIEW_RESULT.md`，并回到普通 Bug 调查 / 修复流程。
+根据当前任务使用以下有效输入：
 
-单服务 Bug 只有在调查后确认必须新增或改变业务规则、接口契约、Target State / Acceptance Criteria，已经属于现有正式 Feature，或用户明确要求持久化 Feature 资料时，才允许升级为 Feature 工作流。
+- Requirement Evidence 与 `REQUIREMENT_SOURCES.md`；
+- `FEATURE_CONTEXT.md`（如果存在）；
+- 当前业务仓库与当前代码；
+- 已有 `TECHNICAL_DESIGN.md` / `HANDOFF.md`（如果是继续同一 Feature）。
 
-## Feature 工作区
+事实关系保持清晰：
 
-只有通过上述使用门禁后，才完整读取并遵守 [Feature Workspace Contract](../../references/feature-workspace-contract.md)：
+- Requirement Evidence 与用户最新确认用于确定需求事实；
+- 当前代码、配置和数据链路用于确定 Current State；
+- `FEATURE_CONTEXT.md` 是需求派生上下文；
+- `TECHNICAL_DESIGN.md` 与 `HANDOFF.md` 是技术决策和阶段状态，不是新的需求事实源。
 
-- Feature 工作区根目录必须按 Contract 的运行时解析规则确定；不得在 Skill 中写死 Windows、WSL、Linux 路径、用户名、盘符、home 目录或挂载点。
-- 在总结或设计前，先保真保存 Chat 原文和可获得的原始附件，并登记 `REQUIREMENT_SOURCES.md`。原始资料不得被派生文档覆盖或静默改写。
-- `FEATURE_CONTEXT.md` 仅是可选的派生 Working Context；单一清晰需求不机械生成。
-- 将当前有效设计写入 `TECHNICAL_DESIGN.md`，将跨阶段当前态写入 `HANDOFF.md`。
+## 阶段边界
 
-第一轮允许写入外部 Feature 工作区，但业务仓库、业务代码、配置和数据库保持只读。Feature 文档不得持久化到业务仓库。
+Design 阶段允许写外部 Feature 工作区文档，但业务仓库、业务代码、配置和数据库保持只读。
 
-## 事实来源
+Feature 文档不得写入业务仓库。
 
-- 需求事实来自用户最新确认、当前有效 PRD / 原型 / 产品补充说明和第三方接口文档在其职责范围内的定义。
-- Feature Context 是高密度需求上下文，默认优先使用；当它与明确的原始需求证据冲突时，以原始证据和用户最新确认处理，并报告冲突。
-- 当前代码、配置和数据链路决定 Current State；不得用当前实现反向定义业务需求。
-- Technical Design、历史讨论和已有方案只是技术线索，不是事实源。
-- 未经验证的判断可以作为调查假设，但不得写成已确认事实。
-
-对会直接改变结果的关键规则要保留精确语义，例如：状态白名单 / 黑名单、枚举、金额公式和阈值、权限和审批条件、幂等 / 并发约束、历史兼容边界、第三方接口契约、关键 AND / OR / NOT 条件。只有当这些规则缺失、冲突或会改变设计结论时，才回查对应原始证据；不要机械重读全部需求资料。
-
-## 调查原则
-
-先理解与当前 Feature 相关的真实代码，再形成设计。
-
-根据任务需要检查入口、必要上下游调用、关键数据流、SQL、事务、缓存、RPC、MQ、Job、异步流程、外部接口、权限、配置和测试。只读取足以支持当前设计判断的上下文，不为满足流程形式穷举所有引用。
-
-如果代码事实推翻已有技术假设，修正技术方案；如果缺失的需求信息会实质改变业务行为、修改范围或验收结论，列为 Open Question，不自行创造业务规则。
-
-## 输出
+## Design 输出
 
 ### 1. Current State
 
-说明当前系统实际上如何工作，只保留与本 Feature 相关的入口、关键调用链、数据流、重要分支和已有约束。引用必要的代码证据，不堆砌文件列表。
+说明与当前 Feature 直接相关的现有实现、关键调用链、结果行为和现有约束，并保留支撑关键技术判断的代码位置。
 
 ### 2. Target State
 
-用清晰业务语言说明需求完成后系统应该如何工作。关键状态、金额、权限、接口和兼容规则必须保留精确条件。
+说明需求完成后应达到的目标行为。会直接改变结果的关键状态、金额、权限、接口和兼容规则必须保留精确语义。
 
 ### 3. Gap Analysis
 
-逐项说明 Current State 与 Target State 的差异。每个 Gap 应能对应到后续必要的代码或验证动作；无法确认的内容放入 Open Questions。
+逐项说明 Current State 与 Target State 的差异。每个 Gap 应对应后续必要的实现或验证动作；无法确认的内容进入 Open Questions。
 
 ### 4. Technical Design
 
-给出实现 Target State 所需的最小必要方案：
-
-- 优先复用项目已有成熟模式；
-- 只修改与 Gap 直接相关的代码和配置；
-- 不顺手重构、改名、抽象或优化；
-- 不改变接口、数据库结构或既有业务语义，除非需求明确要求；
-- 说明关键分支、数据一致性、失败处理、兼容性、日志和测试策略；
-- 重点解释“为什么这样改”，不要用 Harness 术语代替工程描述。
+说明关闭上述 Gap 所需的当前有效技术方案，包括关键分支、数据一致性、失败处理、兼容约束和必要验证设计。
 
 ### 5. Implementation Plan
 
-按依赖顺序列出可执行步骤。每步只说明：目标、主要影响范围、关键约束、验证方式。简单 Feature 不强行拆分任务或 Workstream；复杂 Feature 如确实存在相对独立的业务闭环，可以建议拆分，但不绑定 Session、Context 或 Subagent。
+按依赖关系列出可执行步骤。简单 Feature 不强制拆分；存在相对独立闭环时可以按实际依赖拆分。
 
 ### 6. Risks / Open Questions
 
-只列真实存在且会影响实现或验收的风险与未确认项。
+记录会影响实现、发布或验收的当前风险与未确认项。
 
 ### 7. Validation Strategy
 
-说明与变更风险匹配的验证方式，包括必要的静态检查、单元测试、构建、集成验证或关键业务场景。
+记录与当前 Feature 变更风险匹配的验证目标和验证范围。
 
-## Implementation Handoff
+## 阶段持久化
 
-当后续实现需要跨 Context 复用设计结果时，最后附一个精简 `# IMPLEMENTATION_HANDOFF`；如果当前会话会直接继续实现，也可以保持很短。
+完成 Design 后：
 
-Handoff 只保留：
+- 将当前有效设计写入 `TECHNICAL_DESIGN.md`；
+- 按 Contract 与模板初始化或更新 `HANDOFF.md`；
+- 如果已有前提被当前证据推翻，并且后续重新采用该前提会改变决策，将其记录到 `Invalidated Premises`；
+- `FEATURE_CONTEXT.md` 仅在 Contract 规定的场景下创建或更新。
 
-- Feature Goal
-- Confirmed Requirements
-- Critical Business Rules
-- Out of Scope
-- Current State Summary
-- Target State
-- Key Gaps
-- Technical Decisions
-- Relevant Code Areas
-- Acceptance Criteria
-- Open Issues
-
-不要携带检索过程、工具调用、已废弃方案、冗长代码摘录、状态机式流程元数据或无关聊天历史。
-
-正式需求还必须把当前有效的调查与设计写入外部 `TECHNICAL_DESIGN.md`，并用同样的精简内容初始化或更新 `HANDOFF.md`。Chat 输出应给出结论摘要和文档位置，不能成为唯一持久化载体。
-
-## Writing Style
-
-默认使用直接、易读的中文工程表达。优先写“当前代码做什么、需求要求什么、差在哪里、准备怎么改、为什么这样改”。除非确实需要区分事实来源或冲突，不要反复使用 Requirement Authority、Evidence Pointer、Working Context、Coverage、Workstream 等元流程术语。
+Chat 输出用于说明当前设计结论和工作区位置，不替代外部 Feature 文档。
