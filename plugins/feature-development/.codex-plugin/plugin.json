@@ -1,15 +1,15 @@
 {
   "name": "feature-development",
-  "version": "0.1.4+codex.20260824121500",
-  "description": "使用外部需求资料工作区完成软件 Feature 的保真需求管理、调查设计、实现与独立验收。",
+  "version": "0.2.0-rc.6",
+  "description": "用于正式需求开发，以及需要持久化跨阶段上下文的复杂跨服务变更。",
   "author": {
     "name": "Personal"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Feature Development",
-    "shortDescription": "基于持久化需求资料完成 Feature 开发与验收。",
-    "longDescription": "在业务仓库外维护原始 Requirement Evidence、可选 Feature Context、当前技术设计、滚动 Handoff 与独立 Review Result，并据此完成代码调查、最小实现和 Requirement Validation。",
+    "shortDescription": "正式需求与跨阶段 Feature 工作流。",
+    "longDescription": "提供 Feature Workspace、Requirement Evidence、Hard Fact Verification、Technical Design、滚动 Handoff 与独立 Review Result。任务是否进入 Feature 工作流以及工作区生命周期由 Feature Workspace Contract 统一定义。",
     "developerName": "Personal",
     "category": "Productivity",
     "capabilities": [
@@ -19,6 +19,6 @@
     "brandColor": "#0B4FE5",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
-    "defaultPrompt": "为正式需求建立或复用外部 Feature 工作区，并根据当前阶段使用 feature-design、feature-implement 或 feature-review。"
+    "defaultPrompt": "先判断当前任务是否需要 Feature 工作流；需要时按 Feature Workspace Contract 推进。"
   }
 }

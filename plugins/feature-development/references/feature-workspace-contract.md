@@ -1,108 +1,229 @@
 # Feature Workspace Contract
 
-本契约只适用于新增 Feature、需求迭代或业务规则变更等正式需求开发。纯诊断、一次性问答、不属于既有 Feature 的只读 Review，以及不改变业务行为的机械修改不创建工作区。
+本契约是 `feature-development` 的 Feature 工作流、工作区和跨阶段状态唯一规范。它只定义 Feature 生命周期、Requirement Evidence 完整性和跨阶段状态，不重复维护通用工程行为规则。
 
-## 根目录与命名
+## 1. 任务门禁
 
-- Feature 工作区逻辑根目录：`~/Documents/Codex/features/`。
-- 实际文件操作前，按当前 WSL 用户将 `~` 解析为绝对路径。不得写死用户名、`/home/<user>` 或 `/mnt/c/Users/<user>` 等单机路径。
-- Windows 路径不是固定契约；仅在用户明确要求导出或定位 Windows 文件时，由当前 WSL 绝对路径按需转换。
-- 需求目录：`YYYYMMDD-[需求编号-]需求简称`
-- 需求简称应直接表达业务能力，移除 Windows 不允许的路径字符，避免 `new-chat`、`需求开发`、`修改代码` 等无法辨识的名称。
-- 同名目录仅在需求编号、需求简称和关联仓库一致时复用；否则依次追加 `-02`、`-03`。不得覆盖其他需求目录。
+### Requirement Development
 
-每个需求目录最多保留一层 `requirements/` 子目录：
+以下任务进入 Feature 工作流：
+
+- 新增业务能力；
+- 需求迭代；
+- 修改既定业务规则、状态语义、金额口径、权限 / 审批规则或接口契约；
+- 需要明确新的 Target State 与 Acceptance Criteria 的正式需求；
+- 明确继续已有 Feature Workspace 的任务。
+
+用户不需要显式说出 “Feature”。
+
+### Bug Fix
+
+目标是恢复已经存在或已经确定的正确行为时，仍属于 Bug Fix。读取 PRD、历史需求或产品规则确认预期行为，本身不会把 Bug 升级为 Feature。
+
+以下任务默认不创建 Feature Workspace：
+
+- 单服务 / 单仓库 Bug；
+- 单点回归；
+- 单个 Review Finding 修复；
+- 纯诊断、根因排查；
+- 不属于已有 Feature 的一次性只读 Review；
+- 解释问答；
+- 不改变业务行为的机械修改。
+
+“单服务 / 多服务”按完成任务最终实际需要写入修改的可独立部署服务或仓库数量判断，不按只读调查读取了多少服务判断。
+
+### Bug 升级为 Feature
+
+Bug 满足以下任一条件时可以进入 Feature 工作流：
+
+1. 必须新增或改变业务规则、接口契约、Target State 或 Acceptance Criteria；
+2. 确实需要在两个或以上可独立部署服务 / 仓库中协同写入修改，并需要维护跨服务契约、发布顺序或跨阶段 Handoff；
+3. 当前 Bug 属于已有正式 Feature Workspace；
+4. 用户明确要求使用 Feature 工作流或持久化 Feature 资料。
+
+任务性质或最终修改范围尚未确认时，不提前创建 Feature Workspace。确认满足门禁后再创建或复用。
+
+## 2. 工作区路径
+
+Feature Workspace 根目录按以下顺序解析：
+
+1. `CODEX_FEATURES_DIR` 非空时，使用其解析后的绝对路径；
+2. 否则 `CODEX_HOME` 非空时，使用其下的 `features/`；
+3. 否则使用当前运行时解析的 `~/.codex/features/`。
+
+不得在 Skill 中写死用户名、盘符、Windows / WSL / Linux 绝对路径，也不得手工在 Windows 路径与 `/mnt/<drive>` 之间转换。
+
+显式配置的目录不可访问或不可写时应报告该状态，不静默切换到另一目录。
+
+每个正式需求使用独立目录：
+
+```text
+YYYYMMDD-[需求编号-]需求简称/
+```
+
+只有需求身份和关联业务仓库一致时才复用现有目录。
+
+## 3. 标准结构
 
 ```text
 YYYYMMDD-[需求编号-]需求简称/
 ├── requirements/
 │   ├── ORIGINAL_REQUEST.md
-│   └── 原始附件...
+│   └── 原始附件或快照...
 ├── REQUIREMENT_SOURCES.md
+├── FEATURE_CONTEXT.md       # 仅在有压缩价值时创建
 ├── TECHNICAL_DESIGN.md
 ├── HANDOFF.md
-├── FEATURE_CONTEXT.md        # 按条件生成
-└── REVIEW_RESULT.md          # 独立 Review 后生成
+└── REVIEW_RESULT.md         # 独立 Review 后创建
 ```
 
-使用插件 `assets/feature-workspace/` 下的同名模板初始化 Markdown 文档。模板是结构约束，不是新的 Requirement Evidence。
+初始化文档时使用 `assets/feature-workspace/` 下的对应模板。
 
-## 原始需求保真
+## 4. Requirement Evidence
 
-1. 用户直接在 Chat 中给出的需求文字逐字保存到 `requirements/ORIGINAL_REQUEST.md`，记录获取时间和可定位的 Task / Thread 标识；不得先总结再保存。
-2. 用户提供的本地附件原样复制到 `requirements/`，保留原文件名；可计算时在 `REQUIREMENT_SOURCES.md` 记录 SHA-256，并核对复制前后哈希。
-3. 对链接、在线文档或外部系统记录，优先保存允许导出的原始快照；不能可靠导出时只记录链接、访问时间、版本或更新时间和未落盘原因，不伪造快照。
-4. 外部原始资料发生更新时新增快照或来源记录，将旧记录标记 `SUPERSEDED`，不得覆盖或改写旧证据。
-5. `REQUIREMENT_SOURCES.md` 至少记录 Source ID、类型、原始名称或链接、获取时间、版本信息、任务标识、本地路径、SHA-256（可获得时）和状态。
+Requirement Evidence 保存原始需求事实：
 
-原始资料是 Requirement Evidence。用户后续明确确认可以改变当前有效需求，但必须作为新的 Evidence 记录；不得静默编辑旧证据来制造一致性。
+- Chat 中的原始需求保存到 `requirements/ORIGINAL_REQUEST.md`；
+- 本地附件原样复制到 `requirements/`；
+- 可计算时记录并核对 SHA-256；
+- 在线资料优先保存允许导出的原始快照；无法保存时登记 URL、访问时间、版本 / 更新时间和未落盘原因；
+- `REQUIREMENT_SOURCES.md` 维护 Source ID、来源、版本、位置、状态和冲突；
+- 新版本 Evidence 追加保存，旧来源标记 `SUPERSEDED`，不覆盖旧证据；
+- 用户后续明确确认会改变当前有效需求时，将该确认作为新的 Evidence 登记。
 
-## FEATURE_CONTEXT 生成条件
+Requirement Evidence 与用户最新确认用于确定需求事实。派生文档不能替代或静默改写原始 Evidence。
 
-仅在以下任一情况确实存在时创建 `FEATURE_CONTEXT.md`：
+## 5. Hard Fact 与 Context Integrity
 
-- Requirement Evidence 来自多个来源，需要统一 Scope 和优先级；
-- 原始资料篇幅较长，后续阶段直接反复读取会产生明显上下文成本；
-- 状态、金额、权限、审批、兼容、并发、接口契约或关键 AND / OR / NOT 等规则复杂，需要高密度索引。
+Hard Fact 指一旦丢失、改写或合并就可能直接改变允许 / 禁止、状态流转、金额结果、权限 / 审批、兼容行为、幂等 / 并发或接口契约的需求事实。
 
-单一、简短且已经明确 Goal、Scope、业务规则和验收条件的需求不生成 Feature Context。Feature Context 中每个 Hard Fact 必须包含 Evidence Pointer 和 Verification Status，不得形成只有 Feature Context 自己能够证明的事实。
+Feature Context 只在多来源需要归并、原始资料较长或关键业务规则复杂且存在明显上下文压缩价值时创建。每个持久化 Hard Fact 应保留：
 
-关键词 search / find 只能作为 Evidence 定位入口，不能作为需求完整性结论；“没有命中关键词”不能证明某项业务规则不存在。对会直接改变 Feature 结果的 Hard Fact，仍需结合 Scope、Acceptance Criteria、状态矩阵、规则表或对应需求章节做结构性核对。
+- 简短 Fact ID；
+- 精确 Fact；
+- Evidence Pointer；
+- `VERIFIED` / `CONFLICT` / `NOT VERIFIED`；
+- 如由 Evidence 发现但派生 Context 原先缺失，标记对应 Context Gap。
 
-## Evidence Closure Gate（证据闭环门槛）与 Rejected Hypothesis（已排除假设）
+关键词 search / find 只能用于定位 Evidence，不能作为需求完整性结论；没有命中关键词不能证明某项规则不存在。Design 和 Review 应使用各自 Skill 定义的低成本 Hard Fact Discovery / Integrity Scan，检查 Context Compression 是否整体漏掉会改变结果的规则。
 
-Design、Implement 和 Review 对关键 Current State、根因、高风险 Finding 或 Final Gate 形成确定结论前，必须确认实际入口/触发路径、决定结果的关键分支、关键数据或状态的结果路径，并执行 Competing Hypothesis Check（竞争性假设检查）。单个 grep 命中、单一调用点、单条日志、单个 SQL 片段或一条能够解释现象的路径，不能单独构成闭环证据。
+## 6. Rejected Hypothesis 与 Invalidated Premise
 
-竞争性假设检查只评估最可能推翻当前解释的主要替代解释；不存在合理替代解释时说明原因，不为形式完整制造假设。结果按证据处理：
-
-- 替代解释被支持：当前主要解释失效，继续调查；
-- 证据不足：标记 `NOT VERIFIED（未验证）` / `Open Question（待确认项）`，不得写成已排除；
-- 替代解释被直接反证：只有满足下列全部条件，才可跨阶段保存为 Rejected Hypothesis（已排除假设）。
-
-持久化准入条件：
+`Rejected Hypothesis` 只用于跨阶段保存少量高价值、已经被直接反证的主要替代解释。只有同时满足以下条件才持久化：
 
 1. 曾是当前问题的主要候选；
 2. 若成立会实质改变设计、实现或 Review 结论；
 3. 已实际检查，而非仅凭推测；
-4. 存在直接 Falsifying Evidence（反证）；
-5. Rejected Scope（排除范围）明确；
-6. Reopen If（重新调查条件）具体且可观察。
+4. 存在直接 Falsifying Evidence；
+5. Rejected Scope 明确；
+6. `Reopen If` 具体且可观察。
 
-搜索未命中、暂未发现证据或“当前没看到”不构成反证。竞争性假设检查不等于必须持久化；多数替代解释在调查结束后无需进入 Handoff。
+搜索未命中、暂未发现证据或“当前没看到”不构成反证。多数替代解释无需跨阶段保存。
 
-Rejected Hypothesis（已排除假设）只表示“调查过但未采用的替代解释”。如果某个前提曾被当作成立事实用于设计或实现，后来被新证据推翻，应记录为 Invalidated Premise（失效前提），不要放入已排除假设表。
+Handoff 中只保留：
 
-## 文档职责
+- Hypothesis；
+- Rejected Scope；
+- Falsifying Evidence；
+- Reopen If。
+
+`Reopen If` 成立时，该排除结论立即失效。
+
+`Invalidated Premise` 与 Rejected Hypothesis 不同：它表示某个曾经被当作成立事实用于设计或实现的前提，后来被新证据推翻。只保留会影响后续决策的失效前提、影响范围、替代结论 / 下一动作和 Evidence；旧结论不得继续留在当前有效决策区。
+
+## 7. 派生文档职责
+
+### FEATURE_CONTEXT.md
+
+保存当前有效的 Feature Goal、Scope / Out of Scope、Hard Facts、Acceptance Criteria 与 Open Questions，并通过 Evidence Pointer 回指 Requirement Evidence。
 
 ### TECHNICAL_DESIGN.md
 
-保存当前有效的 Requirement Verification、Current State、Target State、Gap Analysis、Technical Design、Implementation Plan、Validation Strategy、Risks / Open Questions、按上述准入条件保留的少量 Rejected Hypotheses（已排除假设）和失效前提。业务规则必须回指 Requirement Evidence，Current State 必须回指当前代码。
+保存当前有效的：
 
-核心前提失效时，将依赖该前提的设计状态改为 `INVALIDATED`，重新调查并更新当前有效设计；在 `Invalidated Premises` 中只保留失效前提、影响范围、替代结论和证据，不保留冗长讨论历史。
+- Requirement / Hard Fact Verification；
+- Current State；
+- Target State；
+- Gap Analysis；
+- Technical Design；
+- Implementation Plan；
+- Validation Strategy；
+- Risks / Open Questions；
+- 符合准入条件的少量 Rejected Hypotheses；
+- Invalidated Premises。
+
+Current State 回指当前代码，业务规则回指 Requirement Evidence。
 
 ### HANDOFF.md
 
-Handoff 是跨阶段唯一的滚动当前态入口。它只保留当前阶段、状态、Feature Goal、Verified Hard Facts、Evidence Pointers、有效技术决策、少量已排除假设、代码基线、修改状态、验证结果、阻塞项、下一动作及精简失效记录。
+Handoff 是跨阶段滚动当前态入口，保存：
 
-更新时替换已经过期的当前态，不追加工具日志、原始搜索、调试过程、大段代码、聊天摘要、低价值已推翻猜想或废弃方案。已排除假设只保留 `Hypothesis（假设） / Rejected Scope（排除范围） / Falsifying Evidence（反证） / Reopen If（重新调查条件）`；重新调查条件成立时，该排除结论立即失效。
+- 当前 Stage / Status 与代码基线；
+- Feature Goal / Confirmed Requirements；
+- Verified Hard Facts 与 Evidence Pointers；
+- Global Constraints / Out of Scope；
+- Current State / Target State / Key Gaps；
+- Active Technical Decisions；
+- 符合准入条件的少量 Rejected Hypotheses；
+- Modification State / Design Deviations；
+- Validation Results / Unverified Scope；
+- Blockers / Known Risks；
+- Invalidated Premises；
+- Next Action。
+
+更新时替换已经过期的当前态，不累积工具日志、完整检索过程、聊天摘要、运行时编排信息、低价值被推翻猜想或冗长代码摘录。
 
 ### REVIEW_RESULT.md
 
-保存最新一轮独立 Review 的基线、Requirement Gate、Findings、验证证据、适用的少量已排除假设和 `READY` / `NOT READY`。复审时更新当前结果，并在 `Review History` 中保留轮次、时间、旧结论及失效原因的短记录。Handoff 只同步最新门禁、阻塞项和下一动作。
+保存最新一轮独立 Feature Review 的 baseline、Requirement Gate、Findings、Verification Evidence、Remaining Risks / Unverified Items、适用的少量 Rejected Hypotheses，以及上一轮结果为何失效的简短历史。
 
-## 阶段写入边界
+Review Result 不修改 Requirement Evidence。
 
-- Design：创建或复用需求目录，保真保存需求，按条件生成 Feature Context，写入 Technical Design 并初始化 Handoff。
-- Implement：先读 Handoff 和当前代码；按需读取 Technical Design 与 Evidence；在重要里程碑和结束时更新 Handoff。不得修改原始需求。
-- Review：业务仓库保持只读；写入外部 `REVIEW_RESULT.md`，并只同步 Handoff 的 Review 当前态。
-- 核心前提被推翻时，任何阶段都必须先记录 `INVALIDATED` 并回到必要调查，不能在旧方案骨架上继续修补。
+## 8. 阶段边界
 
-外部 Feature 工作区的文档写入不授权修改业务仓库、接口、数据库、配置或扩大业务 Scope。
+### Design
 
-## 读取与 Token 边界
+- 创建或识别已通过门禁的 Feature Workspace；
+- 保存 Requirement Evidence；
+- 执行 Feature-specific Hard Fact Discovery / Verification；
+- 生成或更新 Technical Design 与 Handoff；
+- `FEATURE_CONTEXT.md` 仅在有压缩价值时生成；
+- 业务仓库、业务代码、配置和数据库保持只读。
 
-- 新阶段先读取 `HANDOFF.md` 与 `REQUIREMENT_SOURCES.md`。
-- 仅按当前目标读取 `TECHNICAL_DESIGN.md` 的相关章节、Feature Context 或 Evidence Pointer 指向的原始片段。
-- 不因资料已落盘就同时灌入完整 Chat、全部原始文档、全部设计和工具历史。
-- Rejected Hypotheses（已排除假设）仅保留满足准入条件的高价值反证，不得演变成完整调查历史。
-- Token 是否降低必须用同类任务的实际上下文与正确性验证衡量，不承诺固定比例。
+### Implement
+
+- 使用已有 Workspace；
+- 从 Handoff 恢复当前阶段状态；
+- 根据当前任务读取 Technical Design、Feature Context 或对应 Requirement Evidence；
+- 保持 Relevant Hard Facts 与当前实现目标的映射；
+- 实现当前有效 Target State 对应的 Gap；
+- 在里程碑、验证结束和交付前更新 Handoff；
+- 不改写原始 Requirement Evidence。
+
+### Review
+
+- 基于 Requirement Evidence、Verified Hard Facts、当前 Handoff、最终 diff、当前代码和验证证据独立重建 Feature 结论；
+- 执行 Feature-specific Hard Fact Integrity Check；
+- 业务仓库、生产代码、配置和数据库保持只读；
+- 更新 `REVIEW_RESULT.md`；
+- 将最新 Gate、阻塞项、验证状态、Rejected Hypotheses、Invalidated Premises 和下一动作同步到 Handoff。
+
+外部 Feature Workspace 的文档写入不等于业务仓库写权限，也不自动扩大 Feature Scope。
+
+## 9. 跨阶段读取与 Token 边界
+
+新阶段默认先读取：
+
+1. `HANDOFF.md`；
+2. `REQUIREMENT_SOURCES.md`。
+
+然后根据当前目标读取：
+
+- `TECHNICAL_DESIGN.md`；
+- `FEATURE_CONTEXT.md`；
+- Evidence Pointer 指向的 Requirement Evidence；
+- `REVIEW_RESULT.md`（进入 Rework 或复审时）。
+
+不要因为资料已经落盘，就机械把完整 Chat、全部附件、所有设计版本和全部历史过程同时装入当前 Context。
+
+Rejected Hypotheses 只保留满足准入条件的高价值反证；Invalidated Premises 只保留会改变后续决策的失效前提。二者都不得演变成完整调查历史。
