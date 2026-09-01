@@ -43,6 +43,19 @@ Bug 满足以下任一条件时可以进入 Feature 工作流：
 
 任务性质或最终修改范围尚未确认时，不提前创建 Feature Workspace。确认满足门禁后再创建或复用。
 
+### Repository Scope
+
+Feature 中的仓库角色分为两类：
+
+- `Modification Repositories`：为关闭当前有效 Target State / Gap，已经确认需要或允许写入修改的业务仓库；
+- `Read-only Evidence Repositories`：仅用于确认 producer、authoritative source、接口契约、共享数据语义或上下游行为的只读仓库。
+
+只读调查范围可以按当前关键判断的证据需要扩大，不因此扩大 Modification Scope，也不因为读取了更多仓库改变 Feature / Bug 门禁结论。
+
+只记录当前实际用于关键判断的 Evidence Repository，不要求预先枚举或遍历全部上下游仓库。
+
+如果后续确认某个 Read-only Evidence Repository 必须写入修改，先更新 Repository Scope，并重新确认对应 Target State / Gap、跨仓依赖和验证范围；在完成该更新前不得把它当作 Modification Repository 写入。
+
 ## 2. 工作区路径
 
 Feature Workspace 根目录按以下顺序解析：
@@ -61,7 +74,7 @@ Feature Workspace 根目录按以下顺序解析：
 YYYYMMDD-[需求编号-]需求简称/
 ```
 
-只有需求身份和关联业务仓库一致时才复用现有目录。
+只有需求身份和主要 Modification Repositories 一致时才复用现有目录；Read-only Evidence Repositories 的增减本身不创建新的 Feature Workspace。
 
 ## 3. 标准结构
 
@@ -101,10 +114,13 @@ Requirement Evidence 与用户最新确认用于确定需求事实。派生文�
 
 保存当前有效的 Feature Goal、Scope / Out of Scope、Critical Business Rules、Acceptance Criteria 与 Open Questions，并通过 Evidence Pointer 回指 Requirement Evidence。
 
+Repository Scope 属于技术调查与实现状态，不写入 `FEATURE_CONTEXT.md` 作为需求事实。
+
 ### TECHNICAL_DESIGN.md
 
 保存当前有效的：
 
+- Repository Scope；
 - Current State；
 - Target State；
 - Gap Analysis；
@@ -114,7 +130,7 @@ Requirement Evidence 与用户最新确认用于确定需求事实。派生文�
 - Risks / Open Questions；
 - Invalidated Premises。
 
-Current State 回指当前代码，业务规则回指 Requirement Evidence。
+Current State 回指当前代码，业务规则回指 Requirement Evidence。Repository Scope 需要区分 Modification Repositories 与 Read-only Evidence Repositories，并保留支撑当前关键判断所需的仓库基线。
 
 ### HANDOFF.md
 
@@ -122,7 +138,7 @@ Current State 回指当前代码，业务规则回指 Requirement Evidence。
 
 - Feature Goal / Confirmed Requirements；
 - Critical Business Rules / Out of Scope；
-- 当前代码基线；
+- Repository Scope / 当前代码基线；
 - Current State / Target State / Key Gaps；
 - Current Technical Decisions；
 - Modification State / Design Deviations；
@@ -154,23 +170,25 @@ Review Result 不修改 Requirement Evidence。
 
 - 创建或识别已通过门禁的 Feature Workspace；
 - 保存 Requirement Evidence；
+- 识别并维护 Repository Scope；
 - 生成或更新 Technical Design 与 Handoff；
 - `FEATURE_CONTEXT.md` 仅在有压缩价值时生成；
-- 业务仓库、业务代码、配置和数据库保持只读。
+- 所有业务仓库、业务代码、配置和数据库保持只读。
 
 ### Implement
 
 - 使用已有 Workspace；
 - 从 Handoff 恢复当前阶段状态；
 - 根据当前任务读取 Technical Design、Feature Context 或对应 Requirement Evidence；
-- 实现当前有效 Target State 对应的 Gap；
+- 只在 Modification Repositories 中实现当前有效 Target State 对应的 Gap；
+- Read-only Evidence Repositories 保持只读；
 - 在里程碑、验证结束和交付前更新 Handoff；
 - 不改写原始 Requirement Evidence。
 
 ### Review
 
 - 基于 Requirement Evidence、当前 Handoff、最终 diff、当前代码和验证证据独立重建 Feature 结论；
-- 业务仓库、生产代码、配置和数据库保持只读；
+- 为核验关键 Finding 可以按需读取 Modification Scope 外的 Evidence Repository，但全部业务仓库保持只读；
 - 更新 `REVIEW_RESULT.md`；
 - 将最新 Gate、阻塞项、验证状态、Invalidated Premises 和下一动作同步到 Handoff。
 
