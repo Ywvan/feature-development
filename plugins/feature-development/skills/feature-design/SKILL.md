@@ -25,7 +25,7 @@ description: 用于已经满足 Feature Workspace Contract 门禁的正式需求
 
 - Requirement Evidence 与 `REQUIREMENT_SOURCES.md`；
 - `FEATURE_CONTEXT.md`（如果存在）；
-- 当前相关业务仓库与当前代码；
+- 当前业务仓库与当前代码；
 - 已有 `TECHNICAL_DESIGN.md` / `HANDOFF.md`（如果是继续同一 Feature）。
 
 事实关系保持清晰：
@@ -34,19 +34,6 @@ description: 用于已经满足 Feature Workspace Contract 门禁的正式需求
 - 当前代码、配置和数据链路用于确定 Current State；
 - `FEATURE_CONTEXT.md` 是需求派生上下文；
 - `TECHNICAL_DESIGN.md` 与 `HANDOFF.md` 是技术决策和阶段状态，不是新的需求事实源。
-
-## Repository Scope
-
-按 Contract 区分并维护：
-
-- `Modification Repositories`：当前 Target State / Gap 的关闭方案包含写入修改，且写入未超出用户明确边界的仓库；
-- `Read-only Evidence Repositories`：仅用于确认 Modification Repository 外部产生的字段、状态、金额、接口契约或行为的只读仓库。
-
-当 Design 结论依赖 Modification Repository 外部产生的金额、状态、权限、接口字段、接口契约或行为，且当前已读取代码中不存在对应生产逻辑或权威定义时，读取对应 producer / authoritative source。
-
-确认该结论所依赖的生产逻辑、参数、基准或契约后，不再因同一结论继续读取新的仓库；不得为了完整性遍历全部上下游仓库。
-
-如果无法读取对应 producer / authoritative source，或者其中不存在该生产逻辑或权威定义，将对应结论标记为未验证项或 Open Question；不得根据 consumer 持久化结果、字段名、局部快照或历史结论补齐推断。
 
 ## 阶段边界
 
@@ -58,7 +45,9 @@ Feature 文档不得写入业务仓库。
 
 ### 1. Current State
 
-说明与当前 Feature 直接相关的现有实现、调用链、结果行为和现有约束，并保留支撑上述结论的代码位置。结论依赖跨仓生产逻辑或权威定义时，应保留对应 producer / authoritative source 的证据位置及其 Repository Role。
+说明与当前 Feature 直接相关的现有实现、调用链、结果行为和现有约束，并保留支撑上述结论的代码位置。
+
+当 Current State 中的金额、状态、权限、接口字段或契约结论来自其他仓库的生产结果，且当前已读取代码中没有对应生产逻辑或权威定义时，读取产生该结果的 producer 或 contract owner。确认该结论对应的生产逻辑或权威定义后，不因同一结论继续读取其他仓库；跨仓只读调查不扩大业务代码修改范围。
 
 ### 2. Target State
 
@@ -88,9 +77,9 @@ Feature 文档不得写入业务仓库。
 
 完成 Design 后：
 
-- 将当前 Repository Scope 和有效设计写入 `TECHNICAL_DESIGN.md`；
-- 按 Contract 与模板初始化或更新 `HANDOFF.md`，同步当前 Repository Scope；
+- 将当前有效设计写入 `TECHNICAL_DESIGN.md`；
+- 按 Contract 与模板初始化或更新 `HANDOFF.md`；
 - 如果已有前提被当前证据推翻，并且后续重新采用该前提会改变决策，将其记录到 `Invalidated Premises`；
-- `FEATURE_CONTEXT.md` 仅在 Contract 规定的场景下创建或更新，不写入 Repository Scope 作为需求事实。
+- `FEATURE_CONTEXT.md` 仅在 Contract 规定的场景下创建或更新。
 
 Chat 输出用于说明当前设计结论和工作区位置，不替代外部 Feature 文档。
