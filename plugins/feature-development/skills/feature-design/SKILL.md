@@ -39,14 +39,14 @@ description: 用于已经满足 Feature Workspace Contract 门禁的正式需求
 
 按 Contract 区分并维护：
 
-- `Modification Repositories`：当前 Target State / Gap 已确认需要或允许修改的仓库；
-- `Read-only Evidence Repositories`：仅用于完成关键技术判断证据闭环的只读仓库。
+- `Modification Repositories`：当前 Target State / Gap 的关闭方案包含写入修改，且写入未超出用户明确边界的仓库；
+- `Read-only Evidence Repositories`：仅用于确认 Modification Repository 外部产生的字段、状态、金额、接口契约或行为的只读仓库。
 
-当金额、状态、权限、接口字段或其他关键业务语义由当前 Modification Repository 之外的 producer / authoritative source 产生时，按需读取对应仓库确认真实生产逻辑、参数、基准或契约；不能仅根据 consumer 持久化结果、字段名或局部快照把该语义描述为已确认。
+当 Design 结论依赖 Modification Repository 外部产生的金额、状态、权限、接口字段、接口契约或行为，且当前已读取代码中不存在对应生产逻辑或权威定义时，读取对应 producer / authoritative source。
 
-新增 Read-only Evidence Repository 不扩大 Modification Scope。只读取当前关键判断实际需要的 producer、contract owner 或相关上下游，不要求为了完整性遍历所有仓库。
+确认该结论所依赖的生产逻辑、参数、基准或契约后，不再因同一结论继续读取新的仓库；不得为了完整性遍历全部上下游仓库。
 
-无法取得足以确认关键语义的生产端或权威证据时，将该判断保留为未验证项或 Open Question，不用推测补齐证据闭环。
+如果无法读取对应 producer / authoritative source，或者其中不存在该生产逻辑或权威定义，将对应结论标记为未验证项或 Open Question；不得根据 consumer 持久化结果、字段名、局部快照或历史结论补齐推断。
 
 ## 阶段边界
 
@@ -58,19 +58,19 @@ Feature 文档不得写入业务仓库。
 
 ### 1. Current State
 
-说明与当前 Feature 直接相关的现有实现、关键调用链、结果行为和现有约束，并保留支撑关键技术判断的代码位置。关键语义跨仓产生时，应保留 producer / authoritative source 的对应证据位置及其 Repository Role。
+说明与当前 Feature 直接相关的现有实现、调用链、结果行为和现有约束，并保留支撑上述结论的代码位置。结论依赖跨仓生产逻辑或权威定义时，应保留对应 producer / authoritative source 的证据位置及其 Repository Role。
 
 ### 2. Target State
 
-说明需求完成后应达到的目标行为。会直接改变结果的关键状态、金额、权限、接口和兼容规则必须保留精确语义。
+说明需求完成后应达到的目标行为。会直接改变结果的状态、金额、权限、接口和兼容规则必须保留精确语义。
 
 ### 3. Gap Analysis
 
-逐项说明 Current State 与 Target State 的差异。每个 Gap 应对应后续必要的实现或验证动作；无法确认的内容进入 Open Questions。
+逐项说明 Current State 与 Target State 的差异。每个 Gap 应对应至少一个实现动作或验证动作；无法确认的内容进入 Open Questions。
 
 ### 4. Technical Design
 
-说明关闭上述 Gap 所需的当前有效技术方案，包括关键分支、数据一致性、失败处理、兼容约束和必要验证设计。
+说明关闭上述 Gap 的当前有效技术方案，包括分支、数据一致性、失败处理、兼容约束和对应验证设计。
 
 ### 5. Implementation Plan
 
