@@ -24,18 +24,16 @@ Review 阶段业务仓库、生产代码、配置和数据库保持只读；允�
 开始时恢复并确认：
 
 - 当前 Feature Goal、Confirmed Requirements、Critical Business Rules、Out of Scope 与 Acceptance Criteria；
-- 当前 `HANDOFF.md` 中的 Repository Scope、各仓库基线、实现状态、设计偏差、Invalidated Premises 和验证状态；
+- 当前 `HANDOFF.md` 中的实现状态、设计偏差、Invalidated Premises 和验证状态；
 - 用户指定或当前可确定的最终 diff；
 - 与最终 diff 相关的当前代码；
 - 已执行验证及其结果。
 
 Requirement Evidence、当前代码和当前验证证据用于重建 Review 结论；Technical Design、Handoff、实现说明和历史 Review Result 只提供阶段线索。
 
-当 READY / NOT READY 结论依赖 Modification Scope 外产生的金额、状态、权限、接口字段、接口契约或行为，且当前 Review Evidence 中不存在对应生产逻辑或权威定义时，读取对应 producer / authoritative source，并将该仓库记录为 Read-only Evidence Repository。
+当 READY / NOT READY 结论依赖其他仓库产生的金额、状态、权限、接口字段或契约，且当前 Review Evidence 中没有对应生产逻辑或权威定义时，读取对应 producer 或 contract owner。确认该结论对应的生产逻辑或权威定义后，不因同一结论继续读取其他仓库。
 
-确认该 Review 结论所依赖的生产逻辑、参数、基准或契约后，不再因同一结论继续读取新的仓库；只读调查不扩大 Modification Scope，也不得为了完整性遍历全部上下游。
-
-如果无法读取对应 producer / authoritative source，或者其中不存在该生产逻辑或权威定义，不根据 consumer 字段名、持久化结果或历史结论补齐推断；将对应判断记录为 Verification Gap / Remaining Risk。
+无法读取对应 producer / contract owner，或其中没有对应生产逻辑或权威定义时，将该判断保留为 Verification Gap / Remaining Risk；不得根据 consumer 字段名、持久化结果或历史结论补齐推断。
 
 ## Feature Review 关注点
 
@@ -75,6 +73,6 @@ Requirement Evidence、当前代码和当前验证证据用于重建 Review 结�
 正式 Feature Review 完成后：
 
 - 使用 [REVIEW_RESULT 模板](../../assets/feature-workspace/REVIEW_RESULT.md) 更新 `REVIEW_RESULT.md`；
-- 将最新 Repository Scope、Gate、阻塞项、验证状态和下一动作同步到 `HANDOFF.md`；
+- 将最新 Gate、阻塞项、验证状态和下一动作同步到 `HANDOFF.md`；
 - 如果 Review 证据推翻了此前会影响后续决策的技术前提，将该前提加入 `Invalidated Premises`；
 - `REVIEW_RESULT.md` 保存本轮独立 Review 结果，`HANDOFF.md` 只保存后续阶段需要的当前状态。
