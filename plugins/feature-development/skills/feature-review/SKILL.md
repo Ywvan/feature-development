@@ -31,9 +31,11 @@ Review 阶段业务仓库、生产代码、配置和数据库保持只读；允�
 
 Requirement Evidence、当前代码和当前验证证据用于重建 Review 结论；Technical Design、Handoff、实现说明和历史 Review Result 只提供阶段线索。
 
-为核验影响当前 Feature 的关键金额、状态、权限、接口字段或其他业务语义，可以按 Contract 按需读取 Modification Scope 外的 producer / authoritative source，并将实际使用的仓库作为 Read-only Evidence Repository 记录到当前 Handoff。只读调查不扩大 Modification Scope，也不要求遍历全部上下游。
+当 READY / NOT READY 结论依赖 Modification Scope 外产生的金额、状态、权限、接口字段、接口契约或行为，且当前 Review Evidence 中不存在对应生产逻辑或权威定义时，读取对应 producer / authoritative source，并将该仓库记录为 Read-only Evidence Repository。
 
-如果当前 Gate 依赖的关键语义缺少足够的生产端或权威证据，不根据 consumer 字段名、持久化结果或历史结论补齐推断；将其作为 Verification Gap / Remaining Risk 保留。
+确认该 Review 结论所依赖的生产逻辑、参数、基准或契约后，不再因同一结论继续读取新的仓库；只读调查不扩大 Modification Scope，也不得为了完整性遍历全部上下游。
+
+如果无法读取对应 producer / authoritative source，或者其中不存在该生产逻辑或权威定义，不根据 consumer 字段名、持久化结果或历史结论补齐推断；将对应判断记录为 Verification Gap / Remaining Risk。
 
 ## Feature Review 关注点
 
@@ -45,9 +47,9 @@ Requirement Evidence、当前代码和当前验证证据用于重建 Review 结�
 - 是否存在漏改、过度实现或超出 Out of Scope；
 - 实际实现是否偏离当前有效 Technical Design，以及偏离是否影响需求正确性；
 - 是否存在会阻塞 Feature 完成的 Missing Scenario；
-- 当前验证状态是否足以支持 Feature 完成结论。
+- Acceptance Criteria、当前 Findings 和已识别风险对应的验证是否已有结果；缺失结果是否已进入 Verification Gap。
 
-通用代码风险如被当前 Review 发现，只在其实际影响当前 Feature 时纳入最终 Gate；不要在本 Skill 中维护平行的通用 Review Checklist。
+通用代码风险如被当前 Review 发现，只在它会导致 Requirement / Acceptance Criteria 不满足或阻塞 READY 时纳入最终 Gate；不要在本 Skill 中维护平行的通用 Review Checklist。
 
 ## Feature Finding
 
@@ -64,9 +66,9 @@ Requirement Evidence、当前代码和当前验证证据用于重建 Review 结�
 输出：
 
 - `READY`：当前 Feature 已正确达到目标，且不存在阻塞完成的真实问题；
-- `NOT READY`：存在导致需求错误、功能不完整、关键场景遗漏或关键验证不足的问题。
+- `NOT READY`：存在导致需求错误、功能不完整、场景遗漏的问题，或存在未完成验证使某项 Acceptance Criteria 无法判定是否达到。
 
-关键项暂时无法确认时，应作为当前 Verification Gap / Remaining Risk 保留，不能通过更新文档把未知状态变成 READY 证据。
+当 READY / NOT READY 结论依赖的事实无法从 Requirement Evidence、当前代码或验证结果确认时，将其记录为 Verification Gap / Remaining Risk；不得通过更新文档把未知状态变成 READY 证据。
 
 ## 阶段持久化
 
