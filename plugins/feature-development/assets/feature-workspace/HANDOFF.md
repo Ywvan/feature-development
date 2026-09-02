@@ -3,16 +3,9 @@
 - Stage: `{{DESIGN_IMPLEMENT_OR_REVIEW}}`
 - Status: `{{IN_PROGRESS_BLOCKED_READY_OR_NOT_READY}}`
 - Updated At: `{{UPDATED_AT}}`
-
-## Repository Scope / Baselines
-
-### Modification Repositories
-
-{{MODIFICATION_REPOSITORIES_WITH_BRANCH_COMMIT_AND_WORKTREE}}
-
-### Read-only Evidence Repositories
-
-{{READ_ONLY_EVIDENCE_REPOSITORIES_WITH_BASELINE_AND_PURPOSE_OR_NONE}}
+- Business Repository: `{{REPOSITORY_PATH}}`
+- Branch / Commit: `{{BRANCH_AND_COMMIT}}`
+- Working Tree: `{{WORKING_TREE_STATUS}}`
 
 ## Feature Goal / Confirmed Requirements
 
