@@ -30,14 +30,14 @@
 - 解释问答；
 - 不改变业务行为的机械修改。
 
-“单服务 / 多服务”按完成任务最终实际需要写入修改的可独立部署服务或仓库数量判断，不按只读调查读取了多少服务判断。
+“单服务 / 多服务”按完成任务最终确认会写入修改的可独立部署服务或仓库数量判断，不按只读调查读取了多少服务判断。
 
 ### Bug 升级为 Feature
 
 Bug 满足以下任一条件时可以进入 Feature 工作流：
 
 1. 必须新增或改变业务规则、接口契约、Target State 或 Acceptance Criteria；
-2. 确实需要在两个或以上可独立部署服务 / 仓库中协同写入修改，并需要维护跨服务契约、发布顺序或跨阶段 Handoff；
+2. 当前修复方案包含两个或以上可独立部署服务 / 仓库的协同写入修改，且这些修改之间存在跨服务契约、发布顺序或跨阶段 Handoff 依赖；
 3. 当前 Bug 属于已有正式 Feature Workspace；
 4. 用户明确要求使用 Feature 工作流或持久化 Feature 资料。
 
@@ -47,14 +47,14 @@ Bug 满足以下任一条件时可以进入 Feature 工作流：
 
 Feature 中的仓库角色分为两类：
 
-- `Modification Repositories`：为关闭当前有效 Target State / Gap，已经确认需要或允许写入修改的业务仓库；
+- `Modification Repositories`：当前 Target State / Gap 的关闭方案包含写入修改，且该写入未超出用户明确边界的业务仓库；
 - `Read-only Evidence Repositories`：仅用于确认 producer、authoritative source、接口契约、共享数据语义或上下游行为的只读仓库。
 
-只读调查范围可以按当前关键判断的证据需要扩大，不因此扩大 Modification Scope，也不因为读取了更多仓库改变 Feature / Bug 门禁结论。
+当某个 Design / Review 结论依赖其他仓库产生的字段、状态、金额、接口契约或行为，且当前已读取仓库中不存在对应生产逻辑或权威定义时，将对应 producer / contract owner 加入 `Read-only Evidence Repositories`。
 
-只记录当前实际用于关键判断的 Evidence Repository，不要求预先枚举或遍历全部上下游仓库。
+已确认该结论所依赖的生产逻辑或权威定义后，不再因同一结论继续加入其他 Evidence Repository；不得为了完整性预先枚举或遍历全部上下游仓库。
 
-如果后续确认某个 Read-only Evidence Repository 必须写入修改，先更新 Repository Scope，并重新确认对应 Target State / Gap、跨仓依赖和验证范围；在完成该更新前不得把它当作 Modification Repository 写入。
+仅当不修改某个 Read-only Evidence Repository 就无法满足当前已确认的 Target State / Acceptance Criteria，或当前跨仓契约在保持该仓库不变时无法成立，才将其调整为 Modification Repository。调整前先更新 Repository Scope，并重新确认对应 Target State / Gap、跨仓依赖和验证范围；在完成该更新前不得写入该仓库。
 
 ## 2. 工作区路径
 
@@ -74,7 +74,7 @@ Feature Workspace 根目录按以下顺序解析：
 YYYYMMDD-[需求编号-]需求简称/
 ```
 
-只有需求身份和主要 Modification Repositories 一致时才复用现有目录；Read-only Evidence Repositories 的增减本身不创建新的 Feature Workspace。
+只有需求身份和当前已记录的 Modification Repositories 集合一致时才复用现有目录；Read-only Evidence Repositories 的增减本身不创建新的 Feature Workspace。
 
 ## 3. 标准结构
 
@@ -130,7 +130,7 @@ Repository Scope 属于技术调查与实现状态，不写入 `FEATURE_CONTEXT.
 - Risks / Open Questions；
 - Invalidated Premises。
 
-Current State 回指当前代码，业务规则回指 Requirement Evidence。Repository Scope 需要区分 Modification Repositories 与 Read-only Evidence Repositories，并保留支撑当前关键判断所需的仓库基线。
+Current State 回指当前代码，业务规则回指 Requirement Evidence。Repository Scope 需要区分 Modification Repositories 与 Read-only Evidence Repositories，并记录每个已登记 Repository 的仓库基线。
 
 ### HANDOFF.md
 
@@ -188,7 +188,7 @@ Review Result 不修改 Requirement Evidence。
 ### Review
 
 - 基于 Requirement Evidence、当前 Handoff、最终 diff、当前代码和验证证据独立重建 Feature 结论；
-- 为核验关键 Finding 可以按需读取 Modification Scope 外的 Evidence Repository，但全部业务仓库保持只读；
+- 当 READY / NOT READY 结论依赖 Modification Scope 外产生的字段、状态、金额、接口契约或行为，且当前 Review Evidence 中不存在对应生产逻辑或权威定义时，读取对应 Evidence Repository；全部业务仓库保持只读；
 - 更新 `REVIEW_RESULT.md`；
 - 将最新 Gate、阻塞项、验证状态、Invalidated Premises 和下一动作同步到 Handoff。
 
