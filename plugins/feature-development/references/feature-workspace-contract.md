@@ -11,7 +11,7 @@
 - 新增业务能力；
 - 需求迭代；
 - 修改既定业务规则、状态语义、金额口径、权限 / 审批规则或接口契约；
-- 需要明确新的 Target State 与 Acceptance Criteria 的正式需求；
+- 明确提出新的 Target State 与 Acceptance Criteria 的正式需求；
 - 明确继续已有 Feature Workspace 的任务。
 
 用户不需要显式说出 “Feature”。
@@ -36,7 +36,7 @@
 
 Bug 满足以下任一条件时可以进入 Feature 工作流：
 
-1. 必须新增或改变业务规则、接口契约、Target State 或 Acceptance Criteria；
+1. 当前修复目标包含新增或改变业务规则、接口契约、Target State 或 Acceptance Criteria；
 2. 当前修复方案包含两个或以上可独立部署服务 / 仓库的协同写入修改，且这些修改之间存在跨服务契约、发布顺序或跨阶段 Handoff 依赖；
 3. 当前 Bug 属于已有正式 Feature Workspace；
 4. 用户明确要求使用 Feature 工作流或持久化 Feature 资料。
