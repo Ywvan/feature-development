@@ -1,6 +1,6 @@
 ---
 name: feature-review
-description: 对已有正式 Feature 的最终实现做独立 Requirement Review，基于 Requirement Evidence、当前 Handoff、最终 diff、当前代码和验证证据判断 READY / NOT READY；业务仓库保持只读。
+description: 对已有正式 Feature 的最终实现做独立 Requirement Review，基于 Feature Context、Design Handoff、最终 diff、Current Repo 和验证证据判断 READY / NOT READY；业务仓库保持只读。
 ---
 
 # Feature Review
@@ -13,23 +13,26 @@ description: 对已有正式 Feature 的最终实现做独立 Requirement Review
 
 ## 使用边界
 
-已有正式 Feature 的 Review 按 [Feature Workspace Contract](../../references/feature-workspace-contract.md) 使用现有工作区。
+已有正式 Feature 的 Review 按 [Feature Context Contract](../../references/feature-context-contract.md) 使用当前有效 Context Contract。
 
-不属于已有 Feature 的一次性只读 Review 不强制创建 Feature 工作区。
+不属于已有 Feature 的一次性只读 Review 不强制进入 Feature 工作流。
 
-Review 阶段业务仓库、生产代码、配置和数据库保持只读；允许写外部 Feature Workspace 的 `REVIEW_RESULT.md` 与 `HANDOFF.md`。
+Review 阶段业务仓库、生产代码、配置和数据库保持只读。
 
-## Review Baseline
+## Review Context
 
-开始时恢复并确认：
+Feature Review 使用 Fresh Review Context，不继承 Worker 的完整 Implementation Context。
 
-- 当前 Feature Goal、Confirmed Requirements、Critical Business Rules、Out of Scope 与 Acceptance Criteria；
-- 当前 `HANDOFF.md` 中的实现状态、设计偏差、Invalidated Premises 和验证状态；
+开始时根据当前目标读取：
+
+- `FEATURE_CONTEXT`；
+- `DESIGN_HANDOFF`；
 - 用户指定或当前可确定的最终 diff；
-- 与最终 diff 相关的当前代码；
-- 已执行验证及其结果。
+- 与最终 diff 相关的 Current Repo；
+- 已执行验证及其结果；
+- 必要的 `TASK_RESULT`、Design Deviation、Contract 或 Open Issue。
 
-Requirement Evidence、当前代码和当前验证证据用于重建 Review 结论；Technical Design、Handoff、实现说明和历史 Review Result 只提供阶段线索。
+Requirement Evidence、Current Repo 和当前验证证据用于重建 Review 结论；Design Handoff、实现说明、Task Result 和历史 Review Result 只提供阶段线索。
 
 当 READY / NOT READY 结论依赖其他仓库产生的金额、状态、权限、接口字段或契约，且当前 Review Evidence 中没有对应生产逻辑或权威定义时，读取对应 producer 或 contract owner。确认该结论对应的生产逻辑或权威定义后，不因同一结论继续读取其他仓库。
 
@@ -66,13 +69,20 @@ Requirement Evidence、当前代码和当前验证证据用于重建 Review 结�
 - `READY`：当前 Feature 已正确达到目标，且不存在阻塞完成的真实问题；
 - `NOT READY`：存在导致需求错误、功能不完整、场景遗漏的问题，或存在未完成验证使某项 Acceptance Criteria 无法判定是否达到。
 
-当 READY / NOT READY 结论依赖的事实无法从 Requirement Evidence、当前代码或验证结果确认时，将其记录为 Verification Gap / Remaining Risk；不得通过更新文档把未知状态变成 READY 证据。
+当 READY / NOT READY 结论依赖的事实无法从 Requirement Evidence、Current Repo 或验证结果确认时，将其记录为 Verification Gap / Remaining Risk；不得通过历史结论把未知状态变成 READY 证据。
 
-## 阶段持久化
+## REVIEW_RESULT
 
-正式 Feature Review 完成后：
+正式 Feature Review 完成后，按 Contract 输出 `REVIEW_RESULT`，至少包含：
 
-- 使用 [REVIEW_RESULT 模板](../../assets/feature-workspace/REVIEW_RESULT.md) 更新 `REVIEW_RESULT.md`；
-- 将最新 Gate、阻塞项、验证状态和下一动作同步到 `HANDOFF.md`；
-- 如果 Review 证据推翻了此前会影响后续决策的技术前提，将该前提加入 `Invalidated Premises`；
-- `REVIEW_RESULT.md` 保存本轮独立 Review 结果，`HANDOFF.md` 只保存后续阶段需要的当前状态。
+- Review Baseline；
+- `READY` / `NOT READY`；
+- Current Findings；
+- Verification Evidence；
+- Remaining Risks / Unverified Items。
+
+需要返工时，同时生成 `REWORK_TASK`，明确 Finding / Requirement、Expected Behavior、Rework Scope、Constraints、Acceptance Criteria 与 Verification。
+
+`REVIEW_RESULT` 只保存本轮独立 Review 的当前结论，不携带完整 Worker 历史，也不自动创建 Review / Handoff 状态文件。
+
+用户、项目规则或当前任务明确要求文件交付时，再按该要求生成对应文件。

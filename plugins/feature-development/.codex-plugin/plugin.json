@@ -1,15 +1,15 @@
 {
   "name": "feature-development",
-  "version": "0.2.0-rc.6",
-  "description": "用于正式需求开发，以及需要持久化跨阶段上下文的复杂跨服务变更。",
+  "version": "0.2.0-rc.7",
+  "description": "用于正式需求开发，以及需要跨阶段 Context Contract 的复杂跨服务变更。",
   "author": {
     "name": "Personal"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Feature Development",
-    "shortDescription": "正式需求与跨阶段 Feature 工作流。",
-    "longDescription": "提供 Feature Workspace、Requirement Evidence、Technical Design、滚动 Handoff 与独立 Review Result。任务是否进入 Feature 工作流以及工作区生命周期由 Feature Workspace Contract 统一定义。",
+    "shortDescription": "正式需求与跨阶段 Feature Context 工作流。",
+    "longDescription": "提供 Feature 门禁、Design / Implement / Review 阶段边界，以及 DESIGN_HANDOFF、TASK_RESULT、REWORK_TASK、REVIEW_RESULT 等跨阶段 Context Contract；实现事实以 Current Repo 为主要 Durable State，默认不创建持久化状态文件。",
     "developerName": "Personal",
     "category": "Productivity",
     "capabilities": [
@@ -19,6 +19,6 @@
     "brandColor": "#0B4FE5",
     "composerIcon": "./assets/icon.png",
     "logo": "./assets/icon.png",
-    "defaultPrompt": "先判断当前任务是否需要 Feature 工作流；需要时按 Feature Workspace Contract 推进。"
+    "defaultPrompt": "先判断当前任务是否需要 Feature 工作流；需要时按 Feature Context Contract 推进。"
   }
 }

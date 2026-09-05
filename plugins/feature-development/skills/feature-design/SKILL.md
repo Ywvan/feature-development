@@ -1,45 +1,45 @@
 ---
 name: feature-design
-description: 用于已经满足 Feature Workspace Contract 门禁的正式需求或复杂跨服务变更的调查与技术设计；普通单服务 Bug、一次性诊断和一次性只读 Review 不使用本 Skill。
+description: 用于已经满足 Feature Context Contract 门禁的正式需求或复杂跨服务变更的调查与技术设计；普通单服务 Bug、一次性诊断和一次性只读 Review 不使用本 Skill。
 ---
 
 # Feature Design
 
 ## Goal
 
-把当前有效需求和当前代码事实整理成可执行技术设计，并形成后续阶段可复用的 Feature 状态。
+把当前有效需求和当前代码事实整理成可执行技术设计，并将后续阶段真正需要的信息收敛为 `DESIGN_HANDOFF`。
 
 本 Skill 只负责 Feature Design 阶段，不定义通用调查方法、修改范围规则、Review 规则、SQL / 日志 / 注释规范、测试策略或 Agent 执行策略。
 
-## Feature 工作区门禁
+## Feature 门禁
 
-任务是否进入 Feature 工作流、是否创建或复用工作区，只以 [Feature Workspace Contract](../../references/feature-workspace-contract.md) 为准。
+任务是否进入 Feature 工作流，只以 [Feature Context Contract](../../references/feature-context-contract.md) 为准。
 
-先读取 Contract 的任务门禁。未通过门禁时，不初始化 Feature 工作区，也不继续执行本 Skill 的阶段流程。
+先读取 Contract 的任务门禁。未通过门禁时，不继续执行本 Skill 的阶段流程。
 
-通过门禁后，再读取 Contract 中与当前 Design 阶段相关的工作区、Requirement Evidence、派生文档和 Handoff 规则。
+通过门禁后，再读取 Contract 中与 Design 阶段相关的事实源、Context Contract 和阶段边界。
 
 ## Design 输入
 
 根据当前任务使用以下有效输入：
 
-- Requirement Evidence 与 `REQUIREMENT_SOURCES.md`；
-- `FEATURE_CONTEXT.md`（如果存在）；
+- `FEATURE_CONTEXT`；
+- 原始 Requirement Evidence 与用户最新明确确认；
 - 当前业务仓库与当前代码；
-- 已有 `TECHNICAL_DESIGN.md` / `HANDOFF.md`（如果是继续同一 Feature）。
+- Necessary Repository Evidence；
+- 已有 `DESIGN_HANDOFF`（继续同一 Feature 时）。
 
 事实关系保持清晰：
 
-- Requirement Evidence 与用户最新确认用于确定需求事实；
+- `FEATURE_CONTEXT` 与原始 Requirement Evidence 用于确定需求事实；
 - 当前代码、配置和数据链路用于确定 Current State；
-- `FEATURE_CONTEXT.md` 是需求派生上下文；
-- `TECHNICAL_DESIGN.md` 与 `HANDOFF.md` 是技术决策和阶段状态，不是新的需求事实源。
+- `DESIGN_HANDOFF` 只承载当前有效技术决策和跨阶段必要信息，不是新的需求事实源。
 
 ## 阶段边界
 
-Design 阶段允许写外部 Feature 工作区文档，但业务仓库、业务代码、配置和数据库保持只读。
+Design 阶段业务仓库、业务代码、配置和数据库保持只读。
 
-Feature 文档不得写入业务仓库。
+允许扩大只读调查范围确认事实，但不能因此自动扩大 Modification Scope。
 
 ## Design 输出
 
@@ -61,9 +61,9 @@ Feature 文档不得写入业务仓库。
 
 说明关闭上述 Gap 的当前有效技术方案，包括分支、数据一致性、失败处理、兼容约束和对应验证设计。
 
-### 5. Implementation Plan
+### 5. Task Graph
 
-按依赖关系列出可执行步骤。简单 Feature 不强制拆分；存在相对独立闭环时可以按实际依赖拆分。
+按实际依赖拆分后续实现任务。简单 Feature 不强制拆分；只有存在相对独立闭环时才拆成多个 Task。
 
 ### 6. Risks / Open Questions
 
@@ -73,13 +73,17 @@ Feature 文档不得写入业务仓库。
 
 记录与当前 Feature 变更风险匹配的验证目标和验证范围。
 
-## 阶段持久化
+### 8. DESIGN_HANDOFF
+
+按 Contract 输出后续 Implementation 需要的最小有效上下文。
+
+只保留仍然有效的 Fact / Decision / Constraint / Contract / Dependency / Open Issue，不携带完整搜索过程、工具调用、聊天历史或可从 Current Repo 重新恢复的实现细节。
+
+## 阶段完成
 
 完成 Design 后：
 
-- 将当前有效设计写入 `TECHNICAL_DESIGN.md`；
-- 按 Contract 与模板初始化或更新 `HANDOFF.md`；
-- 如果已有前提被当前证据推翻，并且后续重新采用该前提会改变决策，将其记录到 `Invalidated Premises`；
-- `FEATURE_CONTEXT.md` 仅在 Contract 规定的场景下创建或更新。
-
-Chat 输出用于说明当前设计结论和工作区位置，不替代外部 Feature 文档。
+- 输出 Current State、Target State、Gap Analysis、Technical Design、Task Graph 与 `DESIGN_HANDOFF`；
+- 后续阶段需要的决策原因、兼容约束和 Open Issue 必须进入 `DESIGN_HANDOFF`；
+- 不因阶段完成自动创建或维护 Feature / Design / Handoff 状态文件；
+- 用户、项目规则或当前任务明确要求文件交付时，再按该要求生成对应文件。
