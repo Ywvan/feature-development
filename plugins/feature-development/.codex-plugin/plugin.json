@@ -9,7 +9,7 @@
   "interface": {
     "displayName": "Feature Development",
     "shortDescription": "正式需求与跨阶段 Feature Context 工作流。",
-    "longDescription": "提供 Feature 门禁、Design / Implement / Review 阶段边界，以及 DESIGN_HANDOFF、TASK_RESULT、REWORK_TASK、REVIEW_RESULT 等跨阶段 Context Contract；实现事实以 Current Repo 为主要 Durable State，默认不创建持久化状态文件。",
+    "longDescription": "提供 Feature 门禁、Design / Implement / Review 阶段边界，以及 DESIGN_HANDOFF、TASK_RESULT、REWORK_TASK、REVIEW_RESULT 等跨阶段 Context Contract；实现事实以 Current Repo 为主要 Durable State，资料沿用原仓库外目录，不为每个 Task 创建状态文件。",
     "developerName": "Personal",
     "category": "Productivity",
     "capabilities": [

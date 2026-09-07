@@ -5,85 +5,26 @@ description: 用于已经满足 Feature Context Contract 门禁的正式需求�
 
 # Feature Design
 
-## Goal
+只负责正式 Feature 的调查与技术设计，不定义通用工程或 Agent 执行规则。先读取 [Feature Context Contract](../../references/feature-context-contract.md) 第 1 节门禁；未通过时不执行阶段流程，通过后读取事实源、交接内容和本阶段边界。
 
-把当前有效需求和当前代码事实整理成可执行技术设计，并将后续阶段真正需要的信息收敛为 `DESIGN_HANDOFF`。
+## 输入与只读边界
 
-本 Skill 只负责 Feature Design 阶段，不定义通用调查方法、修改范围规则、Review 规则、SQL / 日志 / 注释规范、测试策略或 Agent 执行策略。
-
-## Feature 门禁
-
-任务是否进入 Feature 工作流，只以 [Feature Context Contract](../../references/feature-context-contract.md) 为准。
-
-先读取 Contract 的任务门禁。未通过门禁时，不继续执行本 Skill 的阶段流程。
-
-通过门禁后，再读取 Contract 中与 Design 阶段相关的事实源、Context Contract 和阶段边界。
-
-## Design 输入
-
-根据当前任务使用以下有效输入：
-
-- `FEATURE_CONTEXT`；
-- 原始 Requirement Evidence 与用户最新明确确认；
-- 当前业务仓库与当前代码；
-- Necessary Repository Evidence；
-- 已有 `DESIGN_HANDOFF`（继续同一 Feature 时）。
-
-事实关系保持清晰：
-
-- `FEATURE_CONTEXT` 与原始 Requirement Evidence 用于确定需求事实；
-- 当前代码、配置和数据链路用于确定 Current State；
-- `DESIGN_HANDOFF` 只承载当前有效技术决策和跨阶段必要信息，不是新的需求事实源。
-
-## 阶段边界
+使用有效 `FEATURE_CONTEXT`、原始 Requirement Evidence、用户最新确认、当前代码/配置/数据链路和 Repository Evidence；继续同一 Feature 时读取已有 `DESIGN_HANDOFF`。需求资料确定目标，代码确定 Current State，Handoff 只承载待复核的技术决策，不成为需求事实。
 
 Design 阶段业务仓库、业务代码、配置和数据库保持只读。
 
-允许扩大只读调查范围确认事实，但不能因此自动扩大 Modification Scope。
+可扩大只读调查确认事实，不因此扩大修改范围。
 
-## Design 输出
+## 设计交付
 
-### 1. Current State
-
-说明与当前 Feature 直接相关的现有实现、调用链、结果行为和现有约束，并保留支撑上述结论的代码位置。
+1. **Current State**：现有实现、真实调用链、结果行为与约束，附代码位置。
+2. **Target State**：目标行为，状态、金额、权限、接口及兼容规则保留精确语义，并遵守 Contract 的硬事实要求。
+3. **Gap Analysis**：逐项差异，每项对应实现或验证动作；未确认项进入 Open Questions。
+4. **Technical Design**：关闭 Gap 的方案，含分支、数据一致性、失败处理、兼容及验证设计。
+5. **Task Graph**：按实际依赖划分，不强制拆分；每个 Task 列明目标、边界、依赖和验收条件，依赖满足后可交付与验收。允许前后依赖，不要求每个 Task 无依赖或单独完成整个 Feature。
+6. **Risks / Open Questions**：影响实现、发布或验收的风险与未知项。
+7. **Validation Strategy**：将本次行为变化和已识别风险对应到验证目标、方式及预期结果；标明证据缺口，遵守现有测试和操作授权。
 
 当 Current State 中的金额、状态、权限、接口字段或契约结论来自其他仓库的生产结果，且当前已读取代码中没有对应生产逻辑或权威定义时，读取产生该结果的 producer 或 contract owner。确认该结论对应的生产逻辑或权威定义后，不因同一结论继续读取其他仓库；跨仓只读调查不扩大业务代码修改范围。
 
-### 2. Target State
-
-说明需求完成后应达到的目标行为。会直接改变结果的状态、金额、权限、接口和兼容规则必须保留精确语义。
-
-### 3. Gap Analysis
-
-逐项说明 Current State 与 Target State 的差异。每个 Gap 应对应至少一个实现动作或验证动作；无法确认的内容进入 Open Questions。
-
-### 4. Technical Design
-
-说明关闭上述 Gap 的当前有效技术方案，包括分支、数据一致性、失败处理、兼容约束和对应验证设计。
-
-### 5. Task Graph
-
-按实际依赖拆分后续实现任务。简单 Feature 不强制拆分；只有存在相对独立闭环时才拆成多个 Task。
-
-### 6. Risks / Open Questions
-
-记录会影响实现、发布或验收的当前风险与未确认项。
-
-### 7. Validation Strategy
-
-记录与当前 Feature 变更风险匹配的验证目标和验证范围。
-
-### 8. DESIGN_HANDOFF
-
-按 Contract 输出后续 Implementation 需要的最小有效上下文。
-
-只保留仍然有效的 Fact / Decision / Constraint / Contract / Dependency / Open Issue，不携带完整搜索过程、工具调用、聊天历史或可从 Current Repo 重新恢复的实现细节。
-
-## 阶段完成
-
-完成 Design 后：
-
-- 输出 Current State、Target State、Gap Analysis、Technical Design、Task Graph 与 `DESIGN_HANDOFF`；
-- 后续阶段需要的决策原因、兼容约束和 Open Issue 必须进入 `DESIGN_HANDOFF`；
-- 不因阶段完成自动创建或维护 Feature / Design / Handoff 状态文件；
-- 用户、项目规则或当前任务明确要求文件交付时，再按该要求生成对应文件。
+以上输出组成 Contract 中的 `DESIGN_HANDOFF`。按 Contract 第 4 节保存原仓库外目录的设计和交接文档；Handoff 保留决策原因、兼容约束、依赖及未解决问题，其余引用接收方可读取的设计章节，不复制整份报告或调查历史。不自动进入实现阶段。

@@ -73,16 +73,6 @@ Requirement Evidence、Current Repo 和当前验证证据用于重建 Review 结
 
 ## REVIEW_RESULT
 
-正式 Feature Review 完成后，按 Contract 输出 `REVIEW_RESULT`，至少包含：
+按 [Feature Context Contract](../../references/feature-context-contract.md) 第 5 节输出当前独立 Review 的 `REVIEW_RESULT`；需要返工时生成 `REWORK_TASK`，完整保留其验收和验证要求。
 
-- Review Baseline；
-- `READY` / `NOT READY`；
-- Current Findings；
-- Verification Evidence；
-- Remaining Risks / Unverified Items。
-
-需要返工时，同时生成 `REWORK_TASK`，明确 Finding / Requirement、Expected Behavior、Rework Scope、Constraints、Acceptance Criteria 与 Verification。
-
-`REVIEW_RESULT` 只保存本轮独立 Review 的当前结论，不携带完整 Worker 历史，也不自动创建 Review / Handoff 状态文件。
-
-用户、项目规则或当前任务明确要求文件交付时，再按该要求生成对应文件。
+不携带 Worker 完整历史。按 Contract 第 4 节更新原仓库外 Review 与 Handoff 文档；业务代码仓库仍保持只读。

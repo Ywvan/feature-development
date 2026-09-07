@@ -1,6 +1,6 @@
 # Feature Context Contract
 
-本契约是 `feature-development` 的 Feature 生命周期与跨阶段 Context 唯一规范。它定义任务门禁、Context Contract、阶段边界和跨阶段传递规则，不重复维护通用工程行为规则，也不要求通过持久化状态文件实现 Agent Memory。
+本契约是 `feature-development` 的 Feature 生命周期与跨阶段 Context 唯一规范。它定义任务门禁、Context Contract、阶段边界和跨阶段传递规则，不重复维护通用工程行为规则。
 
 ## 1. 任务门禁
 
@@ -54,47 +54,36 @@ Feature 工作流使用以下结构化 Context Contract：
 - `REWORK_TASK`：Review 产生的明确返工目标；
 - `REVIEW_RESULT`：独立 Feature Review 的 Gate、Finding 与验证结论。
 
-这些 Contract 是结构化上下文协议，不绑定具体文件名、目录或存储形式。
-
-除非用户、项目规则或当前任务明确要求生成文件，否则不得仅为了 Feature 状态传递而创建或维护持久化文件。
+Contract 定义信息内容，文件位置与维护按第 4 节执行；字段统一在第 5 节定义。可引用接收方能读取的对应资料，不重复全文或使用不可访问的“见上文”。
 
 ## 3. 事实源与 Durable State
 
-需求事实以当前有效 `FEATURE_CONTEXT`、原始 Requirement Evidence 和用户最新明确确认为依据。出现冲突时必须回到原始事实确认，不得由 Technical Design、Handoff 或历史 Review 静默改写需求。
+需求以有效 `FEATURE_CONTEXT`、原始 Requirement Evidence 与用户最新确认为依据；冲突回到原始事实核验，Design、Handoff、Review 不得静默改写需求。用户明确的新需求可更新目标，现状推测仍需验证。
 
-已经完成的实现事实以 `Current Repo` 为主要 Durable State。后续 Task 应重新读取与当前目标相关的真实代码，而不是依赖前一个 Worker 的完整聊天历史。
+实现事实以 Current Repo 为准，各阶段读取当前目标相关代码；历史设计、Handoff、Finding 和 Task Result 是待验证输入，不替代当前事实。保留代码无法恢复且影响后续判断的 Contract、Important Decision、Design Deviation、Dependency、Compatibility Constraint、Open Issue 和决策原因。
 
-技术设计与跨阶段 Contract 只保存当前 Repo 无法可靠恢复、且会影响后续阶段的信息，例如：
+跨阶段不复制完整聊天、搜索/工具历史、大段代码、无关调查或失效方案；对已可从当前代码恢复且不影响后续判断的实现细节不重复留档。精简上下文不得省略需求硬事实、验收证据和未验证项。
 
-- Contract；
-- Important Decision；
-- Design Deviation；
-- Dependency；
-- Compatibility Constraint；
-- Open Issue。
+## 4. 仓库外资料与交接
 
-代码能够恢复最终实现结果，不等于能够恢复决策原因；会影响后续判断的原因仍应保留在对应 Contract 中。
+沿用原有业务代码仓库外目录、子目录与文件名；需求身份及关联仓库一致时复用，不迁移或另设平行目录。
 
-## 4. 持久化边界
+新 Feature 根目录按 `CODEX_FEATURES_DIR` → `$CODEX_HOME/features/` → `~/.codex/features/` 解析，前项未配置才用后一项；子目录为 `YYYYMMDD-[需求编号-]需求简称/`。由当前运行时解析，不写死用户名/盘符、不手工换算 Windows/WSL 路径。不可访问、不可写或落入相关业务仓库时报告并停止文档写入，不静默换目录。
 
-默认不得为了以下目的创建 Feature / Task / Workflow / Review 状态文件：
+- 原始资料保存在 `requirements/`（聊天原始需求使用 `ORIGINAL_REQUEST.md`），来源及新确认登记到 `REQUIREMENT_SOURCES.md`，不覆盖原始证据。
+- Design 维护 `TECHNICAL_DESIGN.md` 和 `HANDOFF.md`；Implement 交付前更新 `HANDOFF.md`；独立 Review 更新 `REVIEW_RESULT.md`，并把 Gate、阻塞项与验证状态同步到 `HANDOFF.md`。
+- 已有或用户要求的 `FEATURE_CONTEXT.md` 按第 5 节维护。交接保留代码无法恢复的需求、决定、约束、依赖及未解决问题；按本次 Contract 字段引用已有资料；对应内容与当前有效事实一致且接收方可读取才可引用，缺项补充、变化更新，不能以原生运行记忆代替。
+- 不为每个 Task 另建进度文件、完整工具记录或重复代码摘要；不规定宿主如何管理自身运行笔记。
 
-- 保存 Agent 记忆；
-- 保存聊天历史或工具调用；
-- 标记当前执行进度；
-- 记录可从 Current Repo 重新确认的实现事实；
-- 为下一阶段复制完整上游 Context。
-
-只有满足以下任一条件时，才主动创建或更新文件：
-
-1. 文件本身是用户明确要求的交付物；
-2. 项目已有规范明确要求维护该文件；
-3. 后续外部阶段只能通过该文件消费必要信息；
-4. 当前必要信息无法通过 Current Repo、已有事实源或运行时 Context 可靠恢复，且缺失会影响任务正确性。
-
-文件只是可选承载形式，不改变 Context Contract 的语义和事实优先级。
+用户禁止写文件时，输出内容并说明未落盘。外部文档写入不授予业务代码仓库写权限；Design / Review 的整个业务代码仓库保持只读，既有未提交修改不得清除，提交/推送仍受用户授权与确认点限制。
 
 ## 5. Contract 最小内容
+
+### FEATURE_CONTEXT
+
+包含目标、范围/排除项、验收、来源及待确认项。状态白名单/黑名单、枚举、金额公式与单位口径、比例/阈值、必填、状态流转条件、AND/OR/NOT 及例外逐项保留，不同判断维度分开；不得抽象省略会改变业务结果的条件。
+
+生成或更新时逐项回查原始证据与用户确认；未成功读取的资料、冲突和未知项注明来源及受影响规则，不自行补齐。
 
 ### DESIGN_HANDOFF
 
@@ -172,7 +161,7 @@ Feature 工作流使用以下结构化 Context Contract：
 - 使用 `FEATURE_CONTEXT`、Requirement Evidence、Current Repo 和必要的 Repository Evidence 构造 Current State；
 - 输出 Current State、Target State、Gap Analysis、Technical Design、Task Graph 与 `DESIGN_HANDOFF`；
 - 业务仓库、业务代码、配置和数据库保持只读；
-- 不因阶段完成自动创建状态文件。
+- 按第 4 节维护仓库外技术设计与交接资料。
 
 ### Implement
 
@@ -189,18 +178,3 @@ Feature 工作流使用以下结构化 Context Contract：
 - 不继承 Worker 的完整 Implementation Context；
 - 业务仓库、生产代码、配置和数据库保持只读；
 - 输出 `REVIEW_RESULT`，需要返工时生成 `REWORK_TASK`。
-
-## 7. 跨阶段传递
-
-新阶段只接收当前目标需要的 Contract 和事实源，并重新读取相关 Current Repo。
-
-默认不要传递：
-
-- 完整聊天历史；
-- 完整搜索 / grep / read 历史；
-- 工具调用记录；
-- 完整代码副本；
-- 已可从 Current Repo 重新确认的实现细节；
-- 与当前阶段无关的历史调查结果。
-
-任何历史设计、Handoff、Finding 或先前结论都不能替代对当前需求事实和当前真实代码的必要验证。
