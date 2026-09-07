@@ -68,12 +68,14 @@ Contract 定义信息内容，文件位置与维护按第 4 节执行；字段�
 
 沿用原有业务代码仓库外目录、子目录与文件名；需求身份及关联仓库一致时复用，不迁移或另设平行目录。
 
-新 Feature 根目录固定使用 `D:\Documents\Codex\features\`，即当前 Codex `Projectless task folder`（`D:\Documents\Codex`）下的 `features\` 子目录；子目录为 `YYYYMMDD-[需求编号-]需求简称/`。不使用 `CODEX_FEATURES_DIR`、`$CODEX_HOME/features/` 或 `~/.codex/features/` 作为回退。目录不可访问、不可写或落入相关业务仓库时报告并停止文档写入，不静默换目录。
+新 Feature 根目录使用当前 Codex 设置中的 `Projectless task folder` 下的 `features/` 子目录；子目录为 `YYYYMMDD-[需求编号-]需求简称/`。当前运行环境无法读取 `Projectless task folder` 的实际配置值时，报告无法确定目录并停止 Feature 文档写入；不得猜测路径、写死盘符或用户名，也不得使用环境变量或其他目录作为回退。
 
 - 原始资料保存在 `requirements/`（聊天原始需求使用 `ORIGINAL_REQUEST.md`），来源及新确认登记到 `REQUIREMENT_SOURCES.md`，不覆盖原始证据。
 - Design 维护 `TECHNICAL_DESIGN.md` 和 `HANDOFF.md`；Implement 交付前更新 `HANDOFF.md`；独立 Review 更新 `REVIEW_RESULT.md`，并把 Gate、阻塞项与验证状态同步到 `HANDOFF.md`。
 - 已有或用户要求的 `FEATURE_CONTEXT.md` 按第 5 节维护。交接保留代码无法恢复的需求、决定、约束、依赖及未解决问题；按本次 Contract 字段引用已有资料；对应内容与当前有效事实一致且接收方可读取才可引用，缺项补充、变化更新，不能以原生运行记忆代替。
 - 不为每个 Task 另建进度文件、完整工具记录或重复代码摘要；不规定宿主如何管理自身运行笔记。
+
+业务代码仓库仅允许写入当前任务直接修改或新增的源码、配置、构建文件、数据库迁移、测试资源、接口定义和仓库内既有文档，以及用户明确要求放入该仓库的其他文件。除此之外，Feature Context、设计 / 交接文档、临时分析文件、导出文件、日志、截图、工具输出等不得写入、复制或移动到业务代码仓库。
 
 用户禁止写文件时，输出内容并说明未落盘。外部文档写入不授予业务代码仓库写权限；Design / Review 的整个业务代码仓库保持只读，既有未提交修改不得清除，提交/推送仍受用户授权与确认点限制。
 
