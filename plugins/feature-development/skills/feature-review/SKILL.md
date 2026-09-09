@@ -13,7 +13,7 @@ description: 对已有正式 Feature 的最终实现做独立 Requirement Review
 
 ## 使用边界
 
-已有正式 Feature 的 Review 按 [Feature Context Contract](../../references/feature-context-contract.md) 使用当前有效 Context Contract。
+已有正式 Feature 视为已完成 Feature 任务门禁，不重复读取任务分类。按 [Feature Context Contract](../../references/feature-context-contract.md) 仅读取与事实源 / Durable State、Review 交接资料、`REVIEW_RESULT` 和 Review 阶段边界相关的内容。
 
 不属于已有 Feature 的一次性只读 Review 不强制进入 Feature 工作流。
 
@@ -73,6 +73,6 @@ Requirement Evidence、Current Repo 和当前验证证据用于重建 Review 结
 
 ## REVIEW_RESULT
 
-按 [Feature Context Contract](../../references/feature-context-contract.md) 第 5 节输出当前独立 Review 的 `REVIEW_RESULT`；需要返工时生成 `REWORK_TASK`，完整保留其验收和验证要求。
+按 Contract 的 `REVIEW_RESULT` 最小内容输出当前独立 Review；需要返工时生成 `REWORK_TASK`，完整保留其验收和验证要求。
 
-不携带 Worker 完整历史。按 Contract 第 4 节更新原仓库外 Review 与 Handoff 文档；业务代码仓库仍保持只读。
+不携带 Worker 完整历史。更新原仓库外 Review 文档及当前有效 `HANDOFF.md` 快照；业务代码仓库仍保持只读。
