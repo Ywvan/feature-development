@@ -1,6 +1,6 @@
 {
   "name": "feature-development",
-  "version": "0.2.0-rc.7",
+  "version": "0.2.0-rc.8",
   "description": "用于正式需求开发，以及需要跨阶段 Context Contract 的复杂跨服务变更。",
   "author": {
     "name": "Personal"
